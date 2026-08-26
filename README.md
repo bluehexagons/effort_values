@@ -8,6 +8,7 @@ An effort value yield search and tracker for Pokémon. The app is a static site,
 * Namable party Pokemon and favorites tracking
 * One-click EV adding
 * Responsive layout for desktop and mobile browsers
+* Docked or floating panel layout with desktop drag-and-snap controls
 * Local autosave in browser storage
 * Shareable state links using a versioned URL hash
 * Drag-and-drop on desktop, with tap-friendly add controls on touch devices
