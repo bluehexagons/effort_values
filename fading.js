@@ -1,83 +1,56 @@
-var timers=new Array();
-var ids=new Array();
-function getTimer(element) {
-	var i=0;
-	for (i=0;i < ids.length;i=i+1) {
-		if (ids[i] == element) return i;
-	}
-	ids[i]=element;
-	return i;
-}
+var timers={};
+
 function fadeStop(element) {
-	clearTimeout(timers[getTimer(element)]);
+	if (timers[element]) {
+		clearTimeout(timers[element]);
+		delete timers[element];
+	}
 }
+
 function setOpacity(element,opacity) {
-	if ((opacity <=1) && (opacity >=0)) {
-		//document.getElementById(element).style.opacity = opacity;
-		//document.getElementById(element).style.filter="alpha("+opacity*100+")";
-		var object = document.getElementById(element).style;
-		object.opacity = (opacity);
-		object.MozOpacity = (opacity);
-		object.KhtmlOpacity = (opacity);
-		object.filter = "alpha(opacity=" + (opacity*100) + ")";
-	}
-	else fadeStop(element);
+	var object=document.getElementById(element);
+	if (!object || opacity < 0 || opacity > 1) return;
+	object.style.opacity=opacity;
 }
-function stepTo(element,opacity,by) {
-	timers[getTimer(element)]=setTimeout("stepTo('"+element+"',"+opacity+","+by+")",33);
-	var x
-	if (document.getElementById(element).style.opacity < opacity) {
-		x=parseFloat(document.getElementById(element).style.opacity) + parseFloat(by);
-		if (x >= opacity) {
-			x=opacity;
+
+function animateOpacity(element,target,rate,hideWhenDone) {
+	var object=document.getElementById(element);
+	if (!object) return;
+	fadeStop(element);
+	var current=parseFloat(getComputedStyle(object).opacity);
+	if (!isFinite(current)) current=target == 0 ? 1 : 0;
+	var amount=Math.max(0.01,Math.abs(parseFloat(rate) || 0.1));
+
+	function step() {
+		var difference=target-current;
+		if (Math.abs(difference) <= amount) {
+			setOpacity(element,target);
+			if (hideWhenDone) object.style.display="none";
 			fadeStop(element);
+			return;
 		}
+		current+=difference > 0 ? amount : -amount;
+		setOpacity(element,current);
+		timers[element]=setTimeout(step,33);
 	}
-	else if (document.getElementById(element).style.opacity > opacity) {
-		x=parseFloat(document.getElementById(element).style.opacity) - parseFloat(by);
-		if (x <= opacity) {
-			x=opacity;
-			fadeStop(element);
-		}
-	}
-	else fadeStop(element);
-	setOpacity(element,x);
+	step();
 }
-function stepOut(element,by) {
-	timers[getTimer(element)]=setTimeout("stepOut('"+element+"',"+by+")",33);
-	var x
-	if (document.getElementById(element).style.opacity > 0) {
-		x=parseFloat(document.getElementById(element).style.opacity) - parseFloat(by);
-		if (x <= 0) {
-			x=0;
-			fadeStop(element);
-			document.getElementById(element).style.display="none";
-		}
-	}
-	else {
-		fadeStop(element);
-		document.getElementById(element).style.display="none";
-	}
-	setOpacity(element,x);
-}
+
 function fadeTo(element,opacity,rate) {
-	clearTimeout(timers[getTimer(element)]);
-	timers[getTimer(element)]=setTimeout("stepTo('"+element+"',"+opacity+","+parseFloat(rate)+")",33);
+	animateOpacity(element,opacity,rate,false);
 }
 function fadeIn(element,rate) {
-	clearTimeout(timers[getTimer(element)]);
-	timers[getTimer(element)]=setTimeout("stepTo('"+element+"',1,"+parseFloat(rate)+")",33);
+	animateOpacity(element,1,rate,false);
 }
 function fadeOut(element,rate) {
-	clearTimeout(timers[getTimer(element)]);
-	timers[getTimer(element)]=setTimeout("stepTo('"+element+"',0,"+parseFloat(rate)+")",33);
+	animateOpacity(element,0,rate,true);
 }
 function appear(element,rate) {
-	document.getElementById(element).style.display="";
-	clearTimeout(timers[getTimer(element)]);
-	timers[getTimer(element)]=setTimeout("stepTo('"+element+"',1,"+parseFloat(rate)+")",33);
+	var object=document.getElementById(element);
+	if (!object) return;
+	object.style.display="";
+	animateOpacity(element,1,rate,false);
 }
 function disappear(element,rate) {
-	clearTimeout(timers[getTimer(element)]);
-	timers[getTimer(element)]=setTimeout("stepOut('"+element+"',"+parseFloat(rate)+")",33);
+	animateOpacity(element,0,rate,true);
 }

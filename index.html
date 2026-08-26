@@ -64,7 +64,10 @@ v1.1:
 -->
 <html>
 <head>
-<title>Effort Value Yield Search v1.10</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#17324d" />
+<title>Effort Value Yield Search</title>
 <!--
 body{
 -moz-user-select: none;
@@ -116,6 +119,52 @@ input.column7{background:#ffaaaa;text-align:right;font-family:monospace}
 input.column8{background:#eeeeee;text-align:right;font-family:monospace}
 
 div.movebutton{display:inline-block;width:50px;background:#999;text-align:center;}
+
+/* Modern layout and controls. The old inline styles are kept for the data table,
+   while these rules make the tool usable on touch screens and narrow displays. */
+:root{color-scheme:light;--ink:#17324d;--muted:#5c6b78;--panel:#fff;--line:#c7d0d8;--accent:#1769aa}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:#f2f5f7;color:#17212b;font:16px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}
+button,input[type="button"]{min-height:40px;border:1px solid #9aa8b5;border-radius:6px;padding:6px 10px;background:#fff;color:#17212b}
+button{cursor:pointer}
+button:hover,input[type="button"]:hover{border-color:var(--accent);background:#f0f7fc}
+button:focus-visible,input:focus-visible{outline:3px solid #8bc7f0;outline-offset:1px}
+label{cursor:pointer}
+#app{width:auto!important;max-width:1180px;margin:0 auto}
+#settings{float:none!important;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}
+#speedtweaks{padding:8px 0;color:var(--muted)}
+#search-controls{padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:16px}
+#save-status{color:var(--muted);font-size:.9rem;margin-left:8px}
+#ev-options{border-left:0!important;display:block!important;margin-bottom:12px}
+#evform table{max-width:100%;overflow-x:auto;display:block;border-bottom:0!important}
+#evform input{width:48px!important;min-height:36px;text-align:center}
+#results{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+#puretable,#othertable{border-collapse:collapse;min-width:650px}
+#puretable td,#puretable th,#othertable td,#othertable th{padding:5px 6px}
+#within{margin-top:14px}
+#workspace{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px;align-items:start}
+#quickchart,#evtracker{position:relative!important;left:auto!important;top:auto!important;z-index:1!important;margin:0!important;min-width:0;max-width:100%;overflow-x:auto;border:1px solid var(--line)!important;border-radius:8px;padding:2px;background:var(--panel)!important}
+#quickchart table,#evtracker table{border-collapse:collapse;min-width:650px}
+#quickchart th,#evtracker th{position:sticky;top:0}
+#boxy{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%);max-width:min(95vw,760px);max-height:85vh;overflow:auto;background:#fff!important;border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 35px #0004;padding:6px}
+#cc{position:static!important;width:auto!important;margin-top:18px;padding-top:12px;border-top:1px solid var(--line);opacity:.7!important}
+#cc img{max-width:44px;height:auto}
+.movebutton{border-radius:4px;padding:4px 8px;min-width:44px;min-height:40px;line-height:30px;touch-action:manipulation}
+td.columnclose,td.columnplus{min-width:40px;min-height:40px}
+@media (max-width:760px){
+ body{padding:10px;font-size:15px}
+ #settings{display:block}
+ #settings>div{margin-bottom:10px}
+ #search-controls{padding:10px 0}
+ #search{width:min(100%,280px)!important;min-height:42px}
+ #workspace{grid-template-columns:1fr;gap:12px}
+ #results{padding:6px}
+ #evform td{padding:2px}
+ #quickchart,#evtracker{width:100%}
+ #quickchart table,#evtracker table{min-width:620px}
+ .pokename{white-space:nowrap}
+}
 
 </style>
 <!--[if IE]>
@@ -176,6 +225,10 @@ var trackzoom;
 var movspeed=30;
 var movfriction=0.7;
 var evselect=-1;
+var STORAGE_KEY="effort-values-state-v2";
+var stateReady=false;
+var saveTimer;
+var stateFromLink=false;
 
 function checkMobile(a){return (/android|avantgo|blackberry|blazer|compal|elaine|fennec|hiptop|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile|o2|opera m(ob|in)i|palm( os)?|p(ixi|re)\/|plucker|pocket|psp|smartphone|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce; (iemobile|ppc)|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|e\-|e\/|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(di|rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)));}
 //script credit to http://detectmobilebrowser.com/ : open source mobile phone detection
@@ -224,68 +277,169 @@ function start() {
 	if ('\v' == 'v') mobile=true;
 
 	if (checkMobile(navigator.userAgent)) mobile=true;
-	//if (navigator.userAgent.split("(")[1].split(";")[0] == "iPhone") mobile=true;
-	if (mobile) {addDelay=true;loadall=false;movbuttons=true;evsearch=false;}
-	queries=window.location.search.substring(1).split('&');
-	if (getQuery("reference") != -1) {
-		var tquick=getQuery("reference").split("-");
-		for (var i in tquick) {
-			quickchart.push(rawByNumber(tquick[i]));
-		}
-	}
-	if (getQuery("tracker") != -1) {
-		var tquick=getQuery("tracker").split("+");
-		for (var i in tquick) {
-			evtracker.push(tquick[i]);
-		}
-	}
-	if (getQuery("set") != -1) {
-		//var allsettings=qkcolumn+"+"+Math.floor(quicktop)+"+"+evcolumn+"+"+Math.floor(tracktop)+"/"+((evsearch) ? "1" : "0")+((within) ? "1" : "0")+((always) ? "1" : "0")+((delaySearch) ? "1" : "0")+((loadall) ? "1" : "0")+((movbuttons) ? "1" : "0");
-			//format: referencex+referencey+trackerx+trackery/filterbyevs searchwithin showall delaysearch loadall movbuttons
-		var firstset=getQuery("set").split("/")[0].split("+");
-		var secondset=getQuery("set").split("/")[1];
-		qkcolumn=parseInt(firstset[0]);
-		quicktop=parseInt(firstset[1]);
-		evcolumn=parseInt(firstset[2]);
-		tracktop=parseInt(firstset[3]);
-		$("quickchart").style.top=quicktop;
-		$("evtracker").style.top=tracktop;
-		
-		evsearch=secondset[0] == 1 ? true : false;
-		within=secondset[1] == 1 ? true : false;
-		always=secondset[2] == 1 ? true : false;
-		addDelay=secondset[3] == 1 ? true : false;
-		loadall=secondset[4] == 1 ? true : false;
-		movbuttons=secondset[5] == 1 ? true : false;
-		if (!evsearch) $("evform").style.display="none";
-	}
-	if (getQuery("evq") != -1) {
-		var splitted=getQuery("evq").split("/");
-		$("exp").value=splitted[0];
-		$("hp").value=splitted[1];
-		$("atk").value=splitted[2];
-		$("def").value=splitted[3];
-		$("sat").value=splitted[4];
-		$("sdf").value=splitted[5];
-		$("spd").value=splitted[6];
-	}
-	if (getQuery("q") != -1) {
-		$("search").value=getQuery("q");
-	}
-
-	
+	loadSavedState();
 	$("showall").checked=always;
 	$("byev").checked=evsearch;
 	//$("innerbox").checked=false;
 	$("dse").checked=addDelay;
-	$("within").checked=within;
+	$("within-filter").checked=within;
 	$("showboost").checked=speedBoosts;
 	$("loadall").checked=loadall;
 	$("movbuttons").checked=movbuttons;
+	if (evsearch) $("evform").style.display="";
+	else $("evform").style.display="none";
+	hideWithin();
 	refreshQuick();
 	refreshTracker();
-	
+
 	enter(document.getElementById("search"));
+	stateReady=true;
+	saveState();
+}
+
+function stateNumber(value, fallback) {
+	var number=parseInt(value,10);
+	return isFinite(number) ? number : fallback;
+}
+function clamp(value,min,max) {
+	return Math.max(min,Math.min(max,value));
+}
+function safeRaw(raw) {
+	if (typeof raw != "string") return null;
+	var parts=raw.split("/");
+	if (parts.length != 9 || parts[0] == "") return null;
+	for (var i=1;i<9;i++) {
+		if (!/^\d+$/.test(parts[i])) return null;
+	}
+	var known=rawByNumber(parts[8]);
+	if (!known || known.split("/")[0] != parts[0]) return null;
+	return parts.join("/");
+}
+function safeTracker(raw) {
+	if (typeof raw != "string") return null;
+	var parts=raw.split("/");
+	if (parts.length != 9) return null;
+	var name=parts.shift().replace(/[\\/]/g,"").slice(0,40);
+	var values=[];
+	for (var i=0;i<8;i++) {
+		var value=stateNumber(parts[i],0);
+		values.push(clamp(value,0,9999));
+	}
+	return name+"/"+values.join("/");
+}
+function stateObject() {
+	processTracker();
+	return {
+		version:2,
+		quickchart:quickchart.slice(0),
+		evtracker:evtracker.slice(0),
+		search:$("search").value,
+		evq:[$("exp").value,$("hp").value,$("atk").value,$("def").value,$("sat").value,$("sdf").value,$("spd").value],
+		settings:{within:within,always:always,evsearch:evsearch,addDelay:addDelay,loadall:loadall,movbuttons:movbuttons},
+		columns:{quick:qkcolumn,tracker:evcolumn}
+	};
+}
+function applyState(state) {
+	if (!state || state.version != 2) return false;
+	var loadedQuick=[];
+	var loadedTracker=[];
+	for (var i=0;i<(state.quickchart || []).length;i++) {
+		var quick=safeRaw(state.quickchart[i]);
+		if (quick) loadedQuick.push(quick);
+	}
+	for (var j=0;j<(state.evtracker || []).length;j++) {
+		var tracker=safeTracker(state.evtracker[j]);
+		if (tracker) loadedTracker.push(tracker);
+	}
+	quickchart=loadedQuick;
+	evtracker=loadedTracker;
+	if (typeof state.search == "string") $("search").value=state.search.slice(0,80);
+	var evq=state.evq || [];
+	var evids=["exp","hp","atk","def","sat","sdf","spd"];
+	for (var k=0;k<evids.length;k++) {
+		if (typeof evq[k] == "string") $(evids[k]).value=evq[k].slice(0,8);
+	}
+	var settings=state.settings || {};
+	if (typeof settings.within == "boolean") within=settings.within;
+	if (typeof settings.always == "boolean") always=settings.always;
+	if (typeof settings.evsearch == "boolean") evsearch=settings.evsearch;
+	if (typeof settings.addDelay == "boolean") addDelay=settings.addDelay;
+	if (typeof settings.loadall == "boolean") loadall=settings.loadall;
+	if (typeof settings.movbuttons == "boolean") movbuttons=settings.movbuttons;
+	var columns=state.columns || {};
+	qkcolumn=clamp(stateNumber(columns.quick,0),0,20);
+	evcolumn=clamp(stateNumber(columns.tracker,0),0,20);
+	return true;
+}
+function decodeState(value) {
+	try {
+		var base64=value.replace(/-/g,"+").replace(/_/g,"/");
+		while (base64.length % 4) base64+="=";
+		var binary=atob(base64);
+		var encoded="";
+		for (var i=0;i<binary.length;i++) encoded+="%"+("00"+binary.charCodeAt(i).toString(16)).slice(-2);
+		return JSON.parse(decodeURIComponent(encoded));
+	} catch (error) {
+		return null;
+	}
+}
+function encodeState(state) {
+	var text=encodeURIComponent(JSON.stringify(state)).replace(/%([0-9A-F]{2})/g,function(match,hex){return String.fromCharCode(parseInt(hex,16));});
+	return btoa(text).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+}
+function loadSavedState() {
+	var hash=window.location.hash;
+	var linked=hash.match(/^#state=([^&]+)$/);
+	var state=null;
+	if (linked) {
+		state=decodeState(linked[1]);
+		stateFromLink=applyState(state);
+	}
+	if (!stateFromLink) {
+		try { state=JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch (error) { state=null; }
+		applyState(state);
+	}
+}
+function saveState() {
+	if (!stateReady) return;
+	try {
+		localStorage.setItem(STORAGE_KEY,JSON.stringify(stateObject()));
+		setSaveStatus("Saved on this device");
+	} catch (error) {
+		setSaveStatus("Local saving is unavailable");
+	}
+}
+function scheduleSave() {
+	if (!stateReady) return;
+	clearTimeout(saveTimer);
+	saveTimer=setTimeout(saveState,250);
+}
+function setSaveStatus(message) {
+	if ($("save-status")) $("save-status").textContent=message;
+}
+function shareState() {
+	var encoded=encodeState(stateObject());
+	var url=window.location.href.split("#")[0]+"#state="+encoded;
+	history.replaceState(null,"",url);
+	saveState();
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(url).then(function(){setSaveStatus("Share link copied");},function(){setSaveStatus("Share link ready in the address bar");});
+	} else {
+		setSaveStatus("Share link ready in the address bar");
+	}
+}
+function resetState() {
+	if (!window.confirm("Clear the saved team and settings on this device?")) return;
+	localStorage.removeItem(STORAGE_KEY);
+	history.replaceState(null,"",window.location.href.split("#")[0]);
+	quickchart=[];
+	evtracker=[];
+	$("search").value="";
+	var evids=["exp","hp","atk","def","sat","sdf","spd"];
+	for (var i=0;i<evids.length;i++) $(evids[i]).value="";
+	within=true;always=false;evsearch=true;addDelay=false;loadall=true;movbuttons=false;
+	$("showall").checked=always;$("byev").checked=evsearch;$("dse").checked=addDelay;$("within-filter").checked=within;$("loadall").checked=loadall;$("movbuttons").checked=movbuttons;
+	refreshQuick();refreshTracker();enter($("search"));setSaveStatus("Saved data cleared");
 }
 function compareColumn(a,b) {
 	return a.split("/")[sortColumn] - b.split("/")[sortColumn];
@@ -307,7 +461,7 @@ function sort(col) {
 	if (sortColumn == 0) {pokemon=trupokemon.sort();}
 	else {pokemon=trupokemon.sort(compareColumn);}
 	if (sortDesc) pokemon=pokemon.reverse();
-	optimized=pokemon;
+	optimize=pokemon;
 	enter($("search"));
 }
 function sortq(col) {
@@ -381,14 +535,18 @@ function getCookie(c_name) { //lifted from w3schools example
 }
 function evs(stf) {
 	enter($("search"));
+	scheduleSave();
 }
 function altEnter(stf) {
 	$("search").value=stf.value;
-	delaySearch=setTimeout("evs();",4000);
+	clearTimeout(delaySearch);
+	delaySearch=setTimeout(function(){evs();},4000);
 }
 function enters(stf) {
-	if (addDelay) delaySearch=setTimeout("evs();",2000);
+	clearTimeout(delaySearch);
+	if (addDelay) delaySearch=setTimeout(function(){evs();},500);
 	else enter(stf);
+	scheduleSave();
 }
 function enter(stf) {
 	$("count").innerHTML="Loading...";
@@ -409,7 +567,7 @@ function enter(stf) {
 					if (pokemon[i].substr(0,text.length).toLowerCase() == text.toLowerCase()) {
 						pure+=genBox(pokemon[i]);
 						count++;
-					}else if (pokemon[i].search(text.toLowerCase(),"") > 0) {
+					}else if (pokemon[i].toLowerCase().indexOf(text.toLowerCase()) > 0) {
 						pure+=genBox(pokemon[i],".5");
 						count++;
 					}else {pure+=genBox(pokemon[i],".2");count++;}
@@ -429,7 +587,7 @@ function enter(stf) {
 						topt.push(optimize[i]);
 						pure+=genBox(optimize[i]);
 						count++;
-					}else if (optimize[i].search(text.toLowerCase(),"") > 0) {
+					}else if (optimize[i].toLowerCase().indexOf(text.toLowerCase()) > 0) {
 						topt.push(optimize[i]);
 						stuff+=genBox(optimize[i]);
 						count2++;
@@ -477,13 +635,7 @@ function updateBars() {
 	$("evtracker").style.left=eboost+Math.max($("puretable").offsetWidth,$("othertable").offsetWidth)+$("puretable").offsetLeft+10;
 }
 function generateLink() {
-	setQuery("q",$("search").value,false);
-	var evqs=$("exp").value+"/"+$("hp").value+"/"+$("atk").value+"/"+$("def").value+"/"+$("sat").value+"/"+$("sdf").value+"/"+$("spd").value;
-	setQuery("evq",evqs,false);
-	//format: referencex+referencey+trackerx+trackery/filterbyevs searchwithin showall delaysearch loadall movbuttons
-	var allsettings=qkcolumn+"+"+Math.floor(quicktop)+"+"+evcolumn+"+"+Math.floor(tracktop)+"/"+(evsearch ? "1" : "0")+(within ? "1" : "0")+(always ? "1" : "0")+(addDelay ? "1" : "0")+(loadall ? "1" : "0")+(movbuttons ? "1" : "0");
-	setQuery("set",allsettings,false);
-	saveQuick(false);
+	shareState();
 }
 function totalEVs(pokeraw) {
 	pokeraw=pokeraw.split("/");
@@ -505,6 +657,7 @@ function refreshQuick() {
 	var footer="<tr><td style='cursor:pointer;background:#aaaaaa' onclick='quickchart=new Array();refreshQuick()'>Clear</td><td colspan='3'></td><td colspan='3' style='cursor:pointer;background:#aaaaaa' onclick='saveQuick()'>Make link</td></tr>";
 	$("quickchart").innerHTML="<table id='quicktable' onmousedown='pushUp(2,1)'>"+quickheader+header+quick+footer+"</table>";;
 	colsize=Math.min($("quickchart").offsetWidth,$("evtracker").offsetWidth);
+	scheduleSave();
 }
 function helpadd(e) {
 	$("boxy").innerHTML="<div onclick='closeboxy()'>The number indicates the total number of EVs the Pokemon yields.<br />Click it to add to the currently selected Pokemon in the EV tracker (click one to select it)</div>";
@@ -533,12 +686,7 @@ function removeQuick(id) {
 	refreshQuick();
 }
 function saveQuick(redirect) {
-	var qstring="";
-	var once=false;
-	for (var i in quickchart) {qstring+=quickchart[i].split("/")[8]+"-";once=true;}
-	if (once) qstring=qstring.substr(0,qstring.length-1);
-	setQuery("reference",qstring,redirect);
-	if (!redirect) saveTracker(true);
+	shareState();
 }
 function pushUp(a,b) {
 	$("quickchart").style.zIndex=a;
@@ -563,7 +711,7 @@ function refreshTracker() {
 		quick+="<tr id='tracker/"+i+"'>"+genTrackCells(evtracker[i],i)+"<td id='close/"+i+"' class='columnclose' onclick='removeTracker(this)'>x</td></tr>";
 	}
 	var footer="<tr><td style='cursor:pointer;background:#aaaaaa' onclick='evtracker=new Array();refreshTracker()'>Clear</td><td colspan='3' ></td><td colspan='3' style='cursor:pointer;background:#aaaaaa' onclick='saveTracker()'>Make link</td><td style='cursor:pointer;background:#aaaaaa' onclick='addTracker()' colspan='3'>Add</td></tr>"
-	$("evtracker").innerHTML="<table id='evtracker' onmousedown='pushUp(1,2)'>"+quickheader+header+quick+footer+"</table>";;
+	$("evtracker").innerHTML="<table id='evtracker-table' onmousedown='pushUp(1,2)'>"+quickheader+header+quick+footer+"</table>";;
 	if ($("tracker/"+evselect) != null) {
 		var kids=$("tracker/"+evselect).getElementsByTagName("td");
 		for (var i in kids) {
@@ -578,6 +726,7 @@ function refreshTracker() {
 		if (inputz[i].innerHTML != undefined) resizeInput(inputz[i]);
 	}
 	colsize=Math.min($("quickchart").offsetWidth,$("evtracker").offsetWidth);
+	scheduleSave();
 }
 
 function zoomTracker(direction) {
@@ -601,21 +750,17 @@ function addTracker() {
 }
 var redirectPause;
 function saveTracker(redirect) {
-	var qstring="";
-	var once=false;
-	for (var i in evtracker) {qstring+=evtracker[i]+"+";once=true;}
-	if (once) qstring=qstring.substr(0,qstring.length-1);
-	setQuery("tracker",qstring,redirect);
-	if (!redirect) saveQuick(true);
+	shareState();
 }
 var trackerTyped=false;
 var trackerArray=new Array();
 function typeTracker(id) {
 	trackerTyped=true;
-	//trackerArray[id.parentNode.id.split("/")[1]];
+	processTracker();
 	resizeInput(id);
 	colsize=Math.min($("quickchart").offsetWidth,$("evtracker").offsetWidth);
 	updateBars();
+	scheduleSave();
 }
 function resizeInput(id) {
 	$("ruler").innerHTML=id.value+".";
@@ -623,32 +768,22 @@ function resizeInput(id) {
 }
 function processTracker(id) {
 	var newevtracker=new Array();
-	var telem=$("evtracker").getElementsByTagName("tr");
-	for (var i in telem) {
-		
-		if (telem[i].innerHTML != undefined) {
-			var tinputs=telem[i].getElementsByTagName("input");
-			var once=false;
-			var current="";
-			for (var i2 in tinputs) {
-				if (tinputs[i2].value != undefined) {
-					current+="/"+tinputs[i2].value;
-					once=true;
-				}
-			}
-			if (once) {
-				newevtracker.push(current.substr(1));
-			}
-		}
+	var rows=$("evtracker").querySelectorAll("tr[id^='tracker/']");
+	for (var i=0;i<rows.length;i++) {
+		var tinputs=rows[i].getElementsByTagName("input");
+		var current="";
+		for (var i2=0;i2<tinputs.length;i2++) current+=(i2 ? "/" : "")+tinputs[i2].value;
+		var tracker=safeTracker(current);
+		if (tracker) newevtracker.push(tracker);
 	}
 	evtracker=newevtracker;
 }
 function genTrackCells(pokeraw,row) {
 	var crap = "";
 	var splitted=pokeraw.split("/");
-	crap+="<td class='pokenameev' onclick='selectInnerInput(this)'><input class='pokenameev' type='text' value='"+splitted[0]+"' style='width:100px' onkeyup='typeTracker(this)' /></td>";
+	crap+="<td class='pokenameev' onclick='selectInnerInput(this)'><input class='pokenameev' type='text' value='"+escapeAttribute(splitted[0])+"' style='width:100px' oninput='typeTracker(this)' /></td>";
 	for (var i=1;i<splitted.length;i++) {
-		crap+="<td id='"+i+"/"+row+"' class='column"+i+"' onclick='selectInnerInput(this,true)'><input class='column"+i+"' type='text' value='"+splitted[i]+"' style='width:30px' onkeyup='typeTracker(this)' /></td>";
+		crap+="<td id='"+i+"/"+row+"' class='column"+i+"' onclick='selectInnerInput(this,true)'><input class='column"+i+"' type='number' inputmode='numeric' min='0' max='9999' value='"+escapeAttribute(splitted[i])+"' style='width:30px' oninput='typeTracker(this)' /></td>";
 	}
 	return crap;
 }
@@ -693,10 +828,16 @@ function genBox(pokeraw,dim) {
 	}
 	return "";
 }
+function escapeHtml(value) {
+	return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function escapeAttribute(value) {
+	return escapeHtml(value);
+}
 function genBoxCells(pokeraw) {
 	var crap = "";
 	var splitted=pokeraw.split("/");
-	crap+="<td class='pokename' onclick='moreinfo(this)' onmousedown='dragname(event,this)'>"+splitted[0]+"</td>";
+	crap+="<td class='pokename' onclick='moreinfo(this)' onmousedown='dragname(event,this)'>"+escapeHtml(splitted[0])+"</td>";
 	for (var i=1;i<splitted.length;i++) {
 		crap+="<td class='column"+i+"'>"+splitted[i]+"</td>";
 	}
@@ -852,7 +993,7 @@ function inRect(x,y,x2,y2,w,h) {
 }
 function addEVs(id) {
 	if (evselect > -1) {
-		var pokeraw=rawByName(id.id.split("/")[1]).split("/");
+		var pokeraw=rawByName(decodeURIComponent(id.id.split("/")[1])).split("/");
 		var splitted=evtracker[evselect].split("/");
 		evtracker[evselect]=splitted[0]+"/"+(parseInt(splitted[1])+parseInt(pokeraw[1]))+"/"+(parseInt(splitted[2])+parseInt(pokeraw[2]))+"/"+(parseInt(splitted[3])+parseInt(pokeraw[3]))+"/"+(parseInt(splitted[4])+parseInt(pokeraw[4]))+"/"+(parseInt(splitted[5])+parseInt(pokeraw[5]))+"/"+(parseInt(splitted[6])+parseInt(pokeraw[6]))+"/"+(parseInt(splitted[7])+parseInt(pokeraw[7]))+"/"+splitted[8];
 		refreshTracker();
@@ -860,12 +1001,14 @@ function addEVs(id) {
 }
 function genInfo(name) {
 	var pokeraw=rawByName(name);
+	if (!pokeraw) return "<div onclick='closeboxy()'>This Pokémon is not in the local database.</div>";
+	var encodedName=encodeURIComponent(name);
 	var header="<tr><th class='pokename' style='cursor:default'>Name</th><th class='column1' style='cursor:default'>EXP</th><th class='column2' style='cursor:default'>HP</th><th class='column3' style='cursor:default'>Atk</th><th class='column4' style='cursor:default'>Def</th><th class='column5' style='cursor:default'>SAt</th><th class='column6' style='cursor:default'>SDf</th><th class='column7' style='cursor:default'>Spd</th><th class='column8' style='cursor:default'>#</th><th class='columnplus' title='Click for help' onclick='helpadd(event)'>+</th><th style='cursor:pointer;width:30px;background:#400;color:#f00' onclick='closeboxy()'>x</th></tr>";
-	var rows="<tr>"+genBoxCells(pokeraw)+"<td id='addevs/"+name+"' onclick='addEVs(this)' style='cursor:pointer;width:30px;background:#040;color:#0f0'>"+totalEVs(rawByName(name))+"</td>"+"<td id='add/"+name+"' onclick='addQuick(this)' style='cursor:pointer;width:30px;background:#004;color:#99f'>+</td>";
+	var rows="<tr>"+genBoxCells(pokeraw)+"<td id='addevs/"+encodedName+"' onclick='addEVs(this)' style='cursor:pointer;width:30px;background:#040;color:#0f0'>"+totalEVs(rawByName(name))+"</td>"+"<td id='add/"+encodedName+"' onclick='addQuick(this)' style='cursor:pointer;width:30px;background:#004;color:#99f'>+</td>";
 	if (name == "Deoxys") rows+=genBox(special[0])+genBox(special[1])+genBox(special[2])+genBox(special[3]);
 	if (name == "Wormadam") rows+=genBox(special[4])+genBox(special[5])+genBox(special[6]);
 	rows+=getLocations(name);
-	return "<table style='text-align:center'>"+header+rows+"<tr><td><img width='32px' height='32px' src='"+imageByRaw(pokeraw)+"' /></td><td colspan='7'><a href='http://bulbapedia.bulbagarden.net/wiki/"+name+"_(Pok%C3%A9mon)' target='_blank'>"+name+" on Bulbapedia</a></td></tr></table>";
+	return "<table style='text-align:center'>"+header+rows+"<tr><td><img width='32px' height='32px' src='"+imageByRaw(pokeraw)+"' /></td><td colspan='7'><a href='https://bulbapedia.bulbagarden.net/wiki/"+encodeURIComponent(name)+"_(Pok%C3%A9mon)' target='_blank' rel='noopener noreferrer'>"+escapeHtml(name)+" on Bulbapedia</a></td></tr></table>";
 }
 function getLocations(name) {
 	var r="";
@@ -873,7 +1016,7 @@ function getLocations(name) {
 		if (locations[i].substr(0,name.length+1).toLowerCase() == name.toLowerCase()+"/") {
 			var splitted=locations[i].split("/");
 			for (var i=1;i < splitted.length;i++) {
-				r+="<tr><td colspan='11' style='text-align:left;background:#ccc'>"+splitted[i]+"</td></tr>";
+				r+="<tr><td colspan='11' style='text-align:left;background:#ccc'>"+escapeHtml(splitted[i])+"</td></tr>";
 			}
 			break;
 		}
@@ -883,7 +1026,7 @@ function getLocations(name) {
 
 
 function addQuick(id) {
-	quickchart.push(rawByName(id.id.split("/")[1]));
+	quickchart.push(rawByName(decodeURIComponent(id.id.split("/")[1])));
 	refreshQuick();
 }
 function genInfoRow(pokeraw) {
@@ -911,9 +1054,9 @@ function moreinfo(id) {
 		$("boxy").style.left=id.offsetLeft+nameparent.offsetLeft;
 		$("boxy").style.top=id.offsetTop+nameparent.offsetTop;
 		appear("boxy",0.1);
-		//window.open("http://bulbapedia.bulbagarden.net/wiki/"+id.innerHTML+"_(Pok%C3%A9mon)");
+		//window.open("https://bulbapedia.bulbagarden.net/wiki/"+id.innerHTML+"_(Pok%C3%A9mon)");
 	}
-	else window.open("http://bulbapedia.bulbagarden.net/wiki/"+id.innerHTML+"_(Pok%C3%A9mon)");
+	else window.open("https://bulbapedia.bulbagarden.net/wiki/"+encodeURIComponent(id.textContent)+"_(Pok%C3%A9mon)","_blank","noopener,noreferrer");
 }
 function closeboxy() {
 	var id=$("boxy");
@@ -926,12 +1069,14 @@ function withins(id) {
 	optimize=pokemon;
 	hideWithin();
 	enter($("search"));
+	scheduleSave();
 }
 function shows(id) {
 	always=id.checked;
 	optimize=pokemon;
 	hideWithin();
 	enter($("search"));
+	scheduleSave();
 }
 function sevs(id) {
 	evsearch=id.checked;
@@ -939,6 +1084,7 @@ function sevs(id) {
 	enter($("search"));
 	if (evsearch) $("evform").style.display="";
 	else $("evform").style.display="none";
+	scheduleSave();
 }
 function hideWithin() {
 	if ((!always) && (within)) $("within").style.display="";
@@ -948,6 +1094,7 @@ function tloadall(id) {
 	loadall=id.checked;
 	optimize=pokemon;
 	enter($("search"));
+	scheduleSave();
 }
 function ibox(id) {
 	innerBox=id.checked;
@@ -958,6 +1105,7 @@ function movebuttons(id) {
 	movbuttons=id.checked;
 	refreshQuick();
 	refreshTracker();
+	scheduleSave();
 }
 function sboost(id) {
 	speedBoosts=id.checked;
@@ -966,6 +1114,7 @@ function sboost(id) {
 }
 function dsearch(id) {
 	addDelay=id.checked;
+	scheduleSave();
 }
 var helpev=false;
 function evhelp() {
@@ -977,6 +1126,7 @@ function evhelp() {
 	}
 }
 function clearEVs() {
+	$("exp").value="";
 	$("hp").value="";
 	$("atk").value="";
 	$("def").value="";
@@ -1005,20 +1155,24 @@ function $(id) {
 </head>
 <body onload="start()" onmousemove="movename(event)" onmouseup="dropname(event)" style="-moz-user-select:;-khtml-user-select:;user-select:;">
 <noscript>
-<h1 style="font-size:60;background:#0000ff;color:#ffff00;z-index:10;">Sup dawg this is entirely JavaScript you should go enable that yo</h1>
+<h1>JavaScript is required to use the effort value tracker.</h1>
 </noscript>
-<div style="width:800px">
-<div style="float:right">
-<div style="text-decoration:underline;display:inline"><input id="showboost" type="checkbox" checked="false" onclick="sboost(this)" />View misc tweaks</div><br />
+<main id="app">
+<header>
+<h1>Effort Value Yield Search</h1>
+<p class="intro">Search Pokémon by the effort values they yield, save a training list, and share it with a link.</p>
+</header>
+<section id="settings" aria-label="Settings">
+<div>
+<label><input id="showboost" type="checkbox" onclick="sboost(this)" /> View misc tweaks</label>
 <div id="speedtweaks" style="display:none">
-<input id="dse" type="checkbox" checked="false" onclick="dsearch(this)" />Delay search<br />
-<input id="loadall" type="checkbox" checked="false" onclick="tloadall(this)" />Load all<br />
-<input id="movbuttons" type="checkbox" checked="false" onclick="movebuttons(this)" />Move Buttons<br />
+<label><input id="dse" type="checkbox" onclick="dsearch(this)" /> Delay search</label><br />
+<label><input id="loadall" type="checkbox" onclick="tloadall(this)" /> Load all</label><br />
+<label><input id="movbuttons" type="checkbox" onclick="movebuttons(this)" /> Show movement buttons</label><br />
 </div>
 </div>
-</div>
-<div style="border-left:1px solid #000000;display:block;">
-<input id="byev" type="checkbox" checked="true" onclick="sevs(this)" />Filter by EVs<br />
+<div id="ev-options">
+<label><input id="byev" type="checkbox" onclick="sevs(this)" /> Filter by EVs</label>
 <div id="evform" style="display:;">
 <table style="border-bottom:1px solid #000000">
 <tr>
@@ -1037,33 +1191,40 @@ function $(id) {
 </table>
 </div>
 </div>
-<input type="checkbox" checked="true" onclick="withins(this)" /> <div style="border-right:1px solid #000000;display:inline;padding-right:8px">Search within</div>
-<input id="showall" type="checkbox" checked="false" onclick="shows(this)" />Show all
-<input type="button" onclick="generateLink()" value="Save All to URL" />
-<br />
-Name: <input id="search" type="text" onkeyup="enters(this)" style="width:200px" /> (<div id="count" style="display:inline">Loading...</div>)<br />
+</section>
+<section id="search-controls" aria-label="Search and saving">
+<label><input id="within-filter" type="checkbox" onclick="withins(this)" /> Search within</label>
+<label><input id="showall" type="checkbox" onclick="shows(this)" /> Show all</label>
+<button type="button" onclick="shareState()">Share / Copy link</button>
+<button type="button" onclick="resetState()">Reset saved data</button>
+<span id="save-status" role="status" aria-live="polite">Loading saved data…</span>
+<br /><br />
+<label for="search">Name:</label> <input id="search" type="search" autocomplete="off" oninput="enters(this)" style="width:200px" /> (<span id="count">Loading...</span>)
+</section>
 <!--<input id="innerbox" type="checkbox" checked="false" onclick="ibox(this)" />Show inner box<br />-->
+<section id="results" aria-label="Search results">
 <div id="exact">
 <div id="pure" onmouseover="closeboxy()"></div>
 </div>
-<br />
 <div id="within" onmouseover="closeboxy()">
-Within: (<div id="count2" style="display:inline">Loading...</div>)
+Within: (<span id="count2">Loading...</span>)
 <div id="stuff"></div>
 </div>
-<div id="debug" style="position:fixed;left:250px;top:10px;background:#000;color:#fff;z-index:10"></div>
-<br /><br /><br />
-<div id="quickchart" onmouseover="closeboxy()" style="z-index:1;background:#ffffff;border:1px solid #000000;margin:3px;position:absolute;top:200px;left:400px">
+</section>
+<section id="workspace" aria-label="Saved lists">
+<div id="quickchart" onmouseover="closeboxy()">
 Drag Pokemon Here To Add
 </div>
-<div id="evtracker" onmouseover="closeboxy()" style="z-index:2;background:#ffffff;border:1px solid #000000;margin:3px;position:absolute;top:400px;left:400px">
+<div id="evtracker" onmouseover="closeboxy()">
 Drag Pokemon Here To Add
 </div>
-<div id="boxy" style="background:#999999;display:none;position:absolute;left:0px;top:0px;opacity:0;z-index:3" ></div>
+</section>
+<div id="boxy" style="display:none;opacity:0;z-index:3" ></div>
 <div id="dragname" style="z-index:4;position:absolute;left:0px;top:0px;width:10px;height:10px;display:none" class="pokename">ddd</div>
-<div id="cc" style="position:absolute;bottom:0px;right:0px;width:300px;opacity:0.2" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.2'">
-<a rel="license" href="http://creativecommons.org/licenses/GPL/2.0/" style=";display:inline;float:right"><img alt="Creative Commons License" src="img/88x62.png" style="border:0px solid #ffffff" /></a>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/GPL/2.0/">Creative Commons GNU General Public License</a>.
+<div id="cc" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7'">
+<a rel="license" href="https://creativecommons.org/licenses/GPL/2.0/" style="display:inline;float:right"><img alt="Creative Commons License" src="img/88x62.png" style="border:0px solid #ffffff" /></a>This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/GPL/2.0/">Creative Commons GNU General Public License</a>.
 </div>
 <table style="visibility:hidden;white-space:nowrap;display:block"><tr><td id="ruler" style="visibility:hidden;white-space:nowrap;display:block"></td></tr></table>
+</main>
 </body>
 </html>
