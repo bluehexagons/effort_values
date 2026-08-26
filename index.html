@@ -143,9 +143,12 @@ label{cursor:pointer}
 #puretable,#othertable{border-collapse:collapse;min-width:650px}
 #puretable td,#puretable th,#othertable td,#othertable th{padding:5px 6px}
 #within{margin-top:14px}
-#workspace{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px;align-items:start;position:relative}
+#main-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,420px);gap:20px;align-items:start}
+#workspace-column{position:sticky;top:12px;min-width:0}
+#workspace{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px;align-items:start;position:relative}
 #quickchart,#evtracker{z-index:1;margin:0;min-width:0;max-width:100%;overflow-x:auto;border:1px solid var(--line)!important;border-radius:8px;padding:2px;background:var(--panel)!important}
-#workspace.floating{display:block;min-height:720px;overflow:hidden}
+#quickchart.drop-target,#evtracker.drop-target{border-color:var(--accent)!important;box-shadow:0 0 0 3px #8bc7f044}
+#workspace.floating{display:block;min-height:640px;overflow:hidden}
 #workspace.floating #quickchart,#workspace.floating #evtracker{position:absolute!important;width:calc(50% - 8px);max-width:none}
 #workspace.floating #quickchart{z-index:2}
 #workspace.floating #evtracker{z-index:3}
@@ -158,6 +161,50 @@ label{cursor:pointer}
 #boxy{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%);max-width:min(95vw,760px);max-height:85vh;overflow:auto;background:#fff!important;border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 35px #0004;padding:6px}
 #cc{position:static!important;width:auto!important;margin-top:18px;padding-top:12px;border-top:1px solid var(--line);opacity:.7!important}
 #cc img{max-width:44px;height:auto}
+.results-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.results-heading h2{margin:0;font-size:1.1rem;color:var(--ink)}
+.sort-controls{display:flex;gap:4px;flex-wrap:wrap}
+.sort-controls button{min-height:32px;padding:3px 7px;font-size:.8rem}
+.result-list{max-height:calc(100vh - 290px);overflow:auto;padding:4px 2px}
+.result-card{display:grid;grid-template-columns:minmax(150px,1fr) auto;gap:8px 12px;align-items:center;border-bottom:1px solid #e1e6ea;padding:9px 4px}
+.result-card[draggable=true]{cursor:grab}
+.result-card[draggable=true]:active{cursor:grabbing}
+.result-card:last-child{border-bottom:0}
+.result-card.dim{opacity:.45}
+.result-identity,.quick-identity{display:flex;align-items:center;gap:8px;min-width:0}
+.result-identity strong,.quick-identity strong{font-weight:700;color:var(--ink)}
+.result-identity small,.quick-identity small{color:var(--muted);white-space:nowrap}
+.sprite-wrap{width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;background:#eef3f6;border-radius:50%}
+.sprite-wrap img{width:40px;height:40px;image-rendering:auto}
+.sprite-fallback{display:none;font-size:1.3rem}
+.ev-pills{display:flex;gap:4px;flex-wrap:wrap;grid-column:1 / -1}
+.ev-pill{font-size:.76rem;padding:2px 6px;border-radius:999px;background:#edf2f5;color:#34495a}
+.result-actions,.quick-actions{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap}
+.result-actions button,.quick-actions button{min-height:32px;padding:3px 7px;font-size:.8rem}
+.icon{width:15px;height:15px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.empty-state{padding:18px 8px;color:var(--muted);text-align:center}
+.quick-card{padding:9px 4px;border-bottom:1px solid #e1e6ea}
+.quick-card:last-child{border-bottom:0}
+.quick-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tracker-entry{padding:9px 4px;border-bottom:1px solid #e1e6ea}
+.tracker-entry.selected{outline:2px solid #8bc7f0;outline-offset:-2px;border-radius:5px}
+.tracker-head{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.tracker-head input{flex:1;min-width:0;min-height:36px}
+.tracker-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.tracker-field{display:flex;flex-direction:column;gap:2px;color:var(--muted);font-size:.7rem;text-align:center}
+.tracker-field input{width:100%!important;min-height:34px;padding:3px;text-align:center}
+.panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 6px;border-bottom:1px solid var(--line);color:var(--ink);font-weight:700}
+.panel-title small{font-weight:400;color:var(--muted)}
+.panel-footer{display:flex;gap:6px;padding:9px 4px;border-top:1px solid var(--line)}
+#quickchart,#evtracker{background:var(--panel)!important}
+#quickchart .panel-drag-handle,#evtracker .panel-drag-handle{display:flex}
+#workspace:not(.floating) .panel-drag-handle{cursor:default!important}
+#quickchart table,#evtracker table{min-width:0;width:100%}
+#quickchart .pokename,#evtracker .pokename{background:transparent;color:var(--ink);padding:0}
+#quickchart .columnplus,#quickchart .columnclose{background:transparent;color:var(--accent);width:auto}
+#quickchart .columnclose{color:#a22}
+#quickchart .quick-card button,#evtracker button{border:1px solid #b9c7d1;background:#fff;color:var(--ink)}
+#quickchart .quick-card button:hover,#evtracker button:hover{background:#f0f7fc}
 .movebutton{border-radius:4px;padding:4px 8px;min-width:44px;min-height:40px;line-height:30px;touch-action:manipulation}
 td.columnclose,td.columnplus{min-width:40px;min-height:40px}
 @media (max-width:760px){
@@ -166,6 +213,8 @@ td.columnclose,td.columnplus{min-width:40px;min-height:40px}
  #settings>div{margin-bottom:10px}
  #search-controls{padding:10px 0}
  #search{width:min(100%,280px)!important;min-height:42px}
+ #main-layout{display:flex;flex-direction:column;gap:12px}
+ #workspace-column{order:-1;position:static;width:100%}
  #workspace{grid-template-columns:1fr;gap:12px}
  #workspace.floating{display:grid;min-height:0;overflow:visible}
  #workspace.floating #quickchart,#workspace.floating #evtracker{position:relative!important;width:100%;left:auto!important;top:auto!important}
@@ -175,6 +224,9 @@ td.columnclose,td.columnplus{min-width:40px;min-height:40px}
  #quickchart table,#evtracker table{min-width:620px}
  .pokename{white-space:nowrap}
  #arrange-controls button:first-of-type{display:none}
+ .result-list{max-height:none;overflow:visible}
+ .result-card{grid-template-columns:1fr}
+ .result-actions{justify-content:flex-start}
 }
 
 </style>
@@ -626,10 +678,8 @@ function enter(stf) {
 			count=optimize.length;
 		}
 	}
-	var header="<tr><th class='pokename' onclick='sort(0)'>Name</th><th class='column1' onclick='sort(1)'>EXP</th><th class='column2' onclick='sort(2)'>HP</th><th class='column3' onclick='sort(3)'>Atk</th><th class='column4' onclick='sort(4)'>Def</th><th class='column5' onclick='sort(5)'>SAt</th><th class='column6' onclick='sort(6)'>SDf</th><th class='column7' onclick='sort(7)'>Spd</th><th class='column8' onclick='sort(8)'>#</th></tr>";
-	//if (innerBar) header+="<tr><td><input type='text' onkeyup='altEnter(this)' value='"+$("search").value+"' /></td></tr>";
-	$("pure").innerHTML="<table id='puretable'>"+header+pure+"</table>";
-	$("stuff").innerHTML="<table id='othertable'>"+header+stuff+"</table>";
+	$("pure").innerHTML=pure || "<div class='empty-state'>No matching Pokémon. Try a different name or filter.</div>";
+	$("stuff").innerHTML=stuff || "<div class='empty-state'>No additional matches.</div>";
 	time=new Date();
 	var end=(time.getMilliseconds()+time.getSeconds()*1000+time.getMinutes()*60000);
 	$("count").innerHTML=count+"/"+(count2+count)+" in "+(end-start)+"ms";
@@ -937,13 +987,46 @@ function compareEV(value,required) {
 	if ((required.substr(required.length-1,1) == "-") && (value <= parseInt(required.substr(0,required.length-1)))) return true;
 	return false;
 }
+function iconSvg(name) {
+	var paths={
+		plus:"<path d='M12 5v14M5 12h14'/>",
+		list:"<path d='M8 6h12M8 12h12M8 18h12'/><path d='M4 6h.01M4 12h.01M4 18h.01'/>",
+		info:"<circle cx='12' cy='12' r='9'/><path d='M12 11v5M12 7h.01'/>",
+		trash:"<path d='M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3'/>",
+		close:"<path d='M6 6l12 12M18 6L6 18'/>",
+		share:"<path d='M12 16V3M7 8l5-5 5 5'/><path d='M5 13v7h14v-7'/>",
+		move:"<path d='M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4'/>"
+	};
+	return "<svg class='icon' viewBox='0 0 24 24' aria-hidden='true'>"+paths[name]+"</svg>";
+}
+function spriteMarkup(pokeraw) {
+	var number=pokeraw.split("/")[8];
+	return "<span class='sprite-wrap'><img src='"+imageByRaw(pokeraw)+"' alt='' width='40' height='40' onerror=\"this.hidden=true;this.nextElementSibling.style.display='inline-flex'\" /><span class='sprite-fallback' aria-hidden='true'>◈</span></span>";
+}
+function evPills(pokeraw) {
+	var parts=pokeraw.split("/");
+	var labels=["EXP","HP","Atk","Def","SAt","SDf","Spd"];
+	var result="";
+	for (var i=1;i<8;i++) result+="<span class='ev-pill'>"+labels[i-1]+" "+parts[i]+"</span>";
+	return result;
+}
+function resultCard(pokeraw,dim,ignoreFilter) {
+	if (!ignoreFilter && evsearch && !checkEVs(pokeraw)) return "";
+	var parts=pokeraw.split("/");
+	var number=escapeAttribute(parts[8]);
+	var classes="result-card"+(dim != null ? " dim" : "");
+	return "<article class='"+classes+"' data-number='"+number+"' draggable='true' ondragstart='dragPokemon(event)' title='Drag to a panel, or use an action button'>"+
+		"<div class='result-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+escapeHtml(parts[8])+"</small></div></div>"+
+		"<div class='result-actions'>"+
+		"<button type='button' onclick='addQuickByNumber(\""+number+"\")' title='Add to Quick Reference'>"+iconSvg("plus")+" Quick add</button>"+
+		"<button type='button' onclick='addTrackerByNumber(\""+number+"\")' title='Add a new tracker row'>"+iconSvg("list")+" Track</button>"+
+		"<button type='button' onclick='showInfoByNumber(\""+number+"\")'>"+iconSvg("info")+" Details</button>"+
+		"</div>"+
+		"<div class='ev-pills'>"+evPills(pokeraw)+"</div>"+
+		"</article>";
+}
 function genBox(pokeraw,dim) {
-	if ((!evsearch) || (checkEVs(pokeraw))) {
-		var crap=genBoxCells(pokeraw);
-		if (dim != null) {return "<tr style='opacity:"+dim+"'>"+crap+"</tr>";}
-		else return "<tr>"+crap+"</tr>";
-	}
-	return "";
+	return resultCard(pokeraw,dim,false);
 }
 function escapeHtml(value) {
 	return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;");
@@ -1116,16 +1199,68 @@ function addEVs(id) {
 		refreshTracker();
 	}
 }
+function addQuickByNumber(number) {
+	var raw=rawByNumber(number);
+	if (!raw) return;
+	for (var i=0;i<quickchart.length;i++) {
+		if (quickchart[i].split("/")[8] == number) {
+			setSaveStatus(raw.split("/")[0]+" is already in Quick Reference");
+			return;
+		}
+	}
+	quickchart.push(raw);
+	refreshQuick();
+	setSaveStatus(raw.split("/")[0]+" added to Quick Reference");
+}
+function addTrackerByNumber(number) {
+	var raw=rawByNumber(number);
+	if (!raw) return;
+	var parts=raw.split("/");
+	evtracker.push(parts[0]+"/0/0/0/0/0/0/0/"+parts[8]);
+	evselect=evtracker.length-1;
+	refreshTracker();
+	setSaveStatus(parts[0]+" added to EV Tracker");
+}
+var draggedPokemonNumber="";
+function dragPokemon(event) {
+	draggedPokemonNumber=event.currentTarget.getAttribute("data-number") || "";
+	if (event.dataTransfer) {
+		event.dataTransfer.effectAllowed="copy";
+		event.dataTransfer.setData("text/plain",draggedPokemonNumber);
+	}
+}
+function allowPokemonDrop(event) {
+	event.preventDefault();
+	if (event.dataTransfer) event.dataTransfer.dropEffect="copy";
+	event.currentTarget.classList.add("drop-target");
+}
+function clearPokemonDrop(event) {
+	event.currentTarget.classList.remove("drop-target");
+}
+function dropPokemon(event,target) {
+	event.preventDefault();
+	clearPokemonDrop(event);
+	var number=(event.dataTransfer && event.dataTransfer.getData("text/plain")) || draggedPokemonNumber;
+	if (target == "quickchart") addQuickByNumber(number);
+	if (target == "evtracker") addTrackerByNumber(number);
+}
+function showInfoByNumber(number) {
+	var raw=rawByNumber(number);
+	if (!raw) return;
+	$("boxy").innerHTML=genInfo(raw.split("/")[0]);
+	appear("boxy",0.1);
+}
 function genInfo(name) {
 	var pokeraw=rawByName(name);
 	if (!pokeraw) return "<div onclick='closeboxy()'>This Pokémon is not in the local database.</div>";
-	var encodedName=encodeURIComponent(name);
-	var header="<tr><th class='pokename' style='cursor:default'>Name</th><th class='column1' style='cursor:default'>EXP</th><th class='column2' style='cursor:default'>HP</th><th class='column3' style='cursor:default'>Atk</th><th class='column4' style='cursor:default'>Def</th><th class='column5' style='cursor:default'>SAt</th><th class='column6' style='cursor:default'>SDf</th><th class='column7' style='cursor:default'>Spd</th><th class='column8' style='cursor:default'>#</th><th class='columnplus' title='Click for help' onclick='helpadd(event)'>+</th><th style='cursor:pointer;width:30px;background:#400;color:#f00' onclick='closeboxy()'>x</th></tr>";
-	var rows="<tr>"+genBoxCells(pokeraw)+"<td id='addevs/"+encodedName+"' onclick='addEVs(this)' style='cursor:pointer;width:30px;background:#040;color:#0f0'>"+totalEVs(rawByName(name))+"</td>"+"<td id='add/"+encodedName+"' onclick='addQuick(this)' style='cursor:pointer;width:30px;background:#004;color:#99f'>+</td>";
-	if (name == "Deoxys") rows+=genBox(special[0])+genBox(special[1])+genBox(special[2])+genBox(special[3]);
-	if (name == "Wormadam") rows+=genBox(special[4])+genBox(special[5])+genBox(special[6]);
-	rows+=getLocations(name);
-	return "<table style='text-align:center'>"+header+rows+"<tr><td><img width='32px' height='32px' src='"+imageByRaw(pokeraw)+"' /></td><td colspan='7'><a href='https://bulbapedia.bulbagarden.net/wiki/"+encodeURIComponent(name)+"_(Pok%C3%A9mon)' target='_blank' rel='noopener noreferrer'>"+escapeHtml(name)+" on Bulbapedia</a></td></tr></table>";
+	var forms="";
+	if (name == "Deoxys") for (var i=0;i<4;i++) forms+=resultCard(special[i],null,true);
+	if (name == "Wormadam") for (var j=4;j<7;j++) forms+=resultCard(special[j],null,true);
+	return "<div class='info-card'><div class='panel-title'><span class='quick-identity'>"+spriteMarkup(pokeraw)+" "+escapeHtml(name)+"</span><button type='button' onclick='closeboxy()' aria-label='Close details'>"+iconSvg("close")+"</button></div>"+
+		resultCard(pokeraw,null,true)+
+		(forms ? "<h3>Special forms</h3>"+forms : "")+
+		"<div class='info-location'>"+getLocations(name)+"</div>"+
+		"<p><a href='https://bulbapedia.bulbagarden.net/wiki/"+encodeURIComponent(name)+"_(Pok%C3%A9mon)' target='_blank' rel='noopener noreferrer'>"+escapeHtml(name)+" on Bulbapedia</a></p></div>";
 }
 function getLocations(name) {
 	var r="";
@@ -1133,7 +1268,7 @@ function getLocations(name) {
 		if (locations[i].substr(0,name.length+1).toLowerCase() == name.toLowerCase()+"/") {
 			var splitted=locations[i].split("/");
 			for (var i=1;i < splitted.length;i++) {
-				r+="<tr><td colspan='11' style='text-align:left;background:#ccc'>"+escapeHtml(splitted[i])+"</td></tr>";
+				r+="<p>"+escapeHtml(splitted[i])+"</p>";
 			}
 			break;
 		}
@@ -1143,8 +1278,7 @@ function getLocations(name) {
 
 
 function addQuick(id) {
-	quickchart.push(rawByName(decodeURIComponent(id.id.split("/")[1])));
-	refreshQuick();
+	addQuickByNumber(id.id.split("/")[1]);
 }
 function genInfoRow(pokeraw) {
 	var name=pokeraw.split("/")[0];
@@ -1268,9 +1402,80 @@ function fromPX(elnumber) {
 function $(id) {
 	return document.getElementById(id);
 }
+
+/* The old table renderer is retained above for the original data helpers. These
+   focused renderers are the active UI: actions are always visible, so adding a
+   Pokémon never depends on drag-and-drop. */
+function modernRefreshQuick() {
+	var html="<div class='panel-title panel-drag-handle' onpointerdown='startPanelDrag(event,\"quickchart\")'><span>"+iconSvg("list")+" Quick Reference</span><small>Drag to move</small></div>";
+	if (quickchart.length == 0) html+="<div class='empty-state'>Use Quick add on any result.</div>";
+	for (var i=0;i<quickchart.length;i++) html+=modernQuickCard(quickchart[i],i);
+	html+="<div class='panel-footer'><button type='button' onclick='shareState()'>"+iconSvg("share")+" Share</button><button type='button' onclick='quickchart=[];refreshQuick()'>"+iconSvg("trash")+" Clear</button></div>";
+	$("quickchart").innerHTML=html;
+	applyPanelLayout();
+	scheduleSave();
+}
+function modernQuickCard(pokeraw,index) {
+	var parts=pokeraw.split("/");
+	return "<article class='quick-card'><div class='quick-meta'><div class='quick-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+parts[8]+"</small></div></div><div class='quick-actions'><button type='button' id='plus/"+index+"' onclick='evplus(this)' title='Add this yield to the selected tracker row'>"+iconSvg("plus")+" "+totalEVs(pokeraw)+" EVs</button><button type='button' onclick='removeQuickIndex("+index+")' aria-label='Remove "+escapeAttribute(parts[0])+"'>"+iconSvg("trash")+"</button></div></div><div class='ev-pills'>"+evPills(pokeraw)+"</div></article>";
+}
+function modernProcessTracker() {
+	var entries=[];
+	var rows=$("evtracker").querySelectorAll(".tracker-entry");
+	for (var i=0;i<rows.length;i++) {
+		var inputs=rows[i].getElementsByTagName("input");
+		var current="";
+		for (var j=0;j<inputs.length;j++) current+=(j ? "/" : "")+inputs[j].value;
+		var entry=safeTracker(current);
+		if (entry) entries.push(entry);
+	}
+	evtracker=entries;
+}
+function modernTrackerCard(pokeraw,row) {
+	var parts=pokeraw.split("/");
+	var labels=["EXP","HP","Atk","Def","SAt","SDf","Spd","#"];
+	var fields="";
+	for (var i=1;i<9;i++) fields+="<label class='tracker-field'>"+labels[i-1]+"<input type='number' inputmode='numeric' min='0' max='9999' value='"+escapeAttribute(parts[i])+"' onfocus='evselect="+row+"' oninput='typeTracker(this)' /></label>";
+	return "<article id='tracker/"+row+"' class='tracker-entry"+(String(evselect) == String(row) ? " selected" : "")+"'><div class='tracker-head'><input type='text' value='"+escapeAttribute(parts[0])+"' aria-label='Tracker name' onfocus='evselect="+row+"' oninput='typeTracker(this)' /><button type='button' onclick='removeTrackerIndex("+row+")' aria-label='Remove tracker row'>"+iconSvg("trash")+"</button></div><div class='tracker-fields'>"+fields+"</div></article>";
+}
+function modernRefreshTracker() {
+	var html="<div class='panel-title panel-drag-handle' onpointerdown='startPanelDrag(event,\"evtracker\")'><span>"+iconSvg("list")+" EV Tracker</span><small>Tap a row to select it</small></div>";
+	if (evtracker.length == 0) html+="<div class='empty-state'>Add a Pokémon with Track, then enter your progress.</div>";
+	for (var i=0;i<evtracker.length;i++) html+=modernTrackerCard(evtracker[i],i);
+	html+="<div class='panel-footer'><button type='button' onclick='addTracker()'>"+iconSvg("plus")+" Blank row</button><button type='button' onclick='shareState()'>"+iconSvg("share")+" Share</button></div>";
+	$("evtracker").innerHTML=html;
+	applyPanelLayout();
+	scheduleSave();
+}
+function modernRemoveTracker(index) {
+	evtracker.splice(index,1);
+	if (evselect >= evtracker.length) evselect=evtracker.length-1;
+	refreshTracker();
+}
+function modernAddTracker() {
+	evtracker.push("/0/0/0/0/0/0/0/0");
+	evselect=evtracker.length-1;
+	refreshTracker();
+	var row=$("tracker/"+evselect);
+	if (row) row.getElementsByTagName("input")[0].select();
+}
+function modernInfo(name) {
+	var pokeraw=rawByName(name);
+	if (!pokeraw) return "<div onclick='closeboxy()'>This Pokémon is not in the local database.</div>";
+	var forms="";
+	if (name == "Deoxys") for (var i=0;i<4;i++) forms+=resultCard(special[i],null,true);
+	if (name == "Wormadam") for (var j=4;j<7;j++) forms+=resultCard(special[j],null,true);
+	return "<div class='info-card'><div class='panel-title'><span class='quick-identity'>"+spriteMarkup(pokeraw)+" "+escapeHtml(name)+"</span><button type='button' onclick='closeboxy()' aria-label='Close details'>"+iconSvg("close")+"</button></div>"+resultCard(pokeraw,null,true)+(forms ? "<h3>Special forms</h3>"+forms : "")+"<div class='info-location'>"+getLocations(name)+"</div><p><a href='https://bulbapedia.bulbagarden.net/wiki/"+encodeURIComponent(name)+"_(Pok%C3%A9mon)' target='_blank' rel='noopener noreferrer'>"+escapeHtml(name)+" on Bulbapedia</a></p></div>";
+}
+function refreshQuick() { modernRefreshQuick(); }
+function refreshTracker() { modernRefreshTracker(); }
+function processTracker() { modernProcessTracker(); }
+function removeTracker(id) { modernRemoveTracker(parseInt(id.id.split("/")[1],10)); }
+function addTracker() { modernAddTracker(); }
+function genInfo(name) { return modernInfo(name); }
 </script>
 </head>
-<body onload="start()" onmousemove="movename(event)" onmouseup="dropname(event)" style="-moz-user-select:;-khtml-user-select:;user-select:;">
+<body onload="start()" style="-moz-user-select:;-khtml-user-select:;user-select:;">
 <noscript>
 <h1>JavaScript is required to use the effort value tracker.</h1>
 </noscript>
@@ -1318,30 +1523,47 @@ function $(id) {
 <label for="search">Name:</label> <input id="search" type="search" autocomplete="off" oninput="enters(this)" style="width:200px" /> (<span id="count">Loading...</span>)
 </section>
 <!--<input id="innerbox" type="checkbox" checked="false" onclick="ibox(this)" />Show inner box<br />-->
+<div id="main-layout">
 <section id="results" aria-label="Search results">
+<div class="results-heading">
+<h2>Yield results</h2>
+<div class="sort-controls" aria-label="Sort results">
+<button type="button" onclick="sort(0)">Name</button>
+<button type="button" onclick="sort(8)">#</button>
+<button type="button" onclick="sort(1)">EXP</button>
+<button type="button" onclick="sort(2)">HP</button>
+<button type="button" onclick="sort(3)">Atk</button>
+<button type="button" onclick="sort(4)">Def</button>
+<button type="button" onclick="sort(5)">SAt</button>
+<button type="button" onclick="sort(6)">SDf</button>
+<button type="button" onclick="sort(7)">Spd</button>
+</div>
+</div>
 <div id="exact">
-<div id="pure" onmouseover="closeboxy()"></div>
+<div id="pure" class="result-list" onmouseover="closeboxy()"></div>
 </div>
 <div id="within" onmouseover="closeboxy()">
 Within: (<span id="count2">Loading...</span>)
-<div id="stuff"></div>
+<div id="stuff" class="result-list"></div>
 </div>
 </section>
+<div id="workspace-column">
 <div id="arrange-controls" aria-label="Panel arrangement">
 <span>Panel layout:</span>
 <button type="button" id="toggle-float" onclick="togglePanelLayout()">Float panels</button>
 <button type="button" onclick="snapPanels()">Snap panels</button>
 </div>
 <section id="workspace" aria-label="Saved lists">
-<div id="quickchart" onmouseover="closeboxy()">
-Drag Pokemon Here To Add
+<div id="quickchart" onmouseover="closeboxy()" ondragover="allowPokemonDrop(event)" ondragleave="clearPokemonDrop(event)" ondrop="dropPokemon(event,'quickchart')">
+Use Quick add on any result.
 </div>
-<div id="evtracker" onmouseover="closeboxy()">
-Drag Pokemon Here To Add
+<div id="evtracker" onmouseover="closeboxy()" ondragover="allowPokemonDrop(event)" ondragleave="clearPokemonDrop(event)" ondrop="dropPokemon(event,'evtracker')">
+Add a Pokémon with Track, then enter your progress.
 </div>
 </section>
+</div>
+</div>
 <div id="boxy" style="display:none;opacity:0;z-index:3" ></div>
-<div id="dragname" style="z-index:4;position:absolute;left:0px;top:0px;width:10px;height:10px;display:none" class="pokename">ddd</div>
 <div id="cc" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7'">
 <a rel="license" href="https://creativecommons.org/licenses/GPL/2.0/" style="display:inline;float:right"><img alt="Creative Commons License" src="img/88x62.png" style="border:0px solid #ffffff" /></a>This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/GPL/2.0/">Creative Commons GNU General Public License</a>.
 </div>
