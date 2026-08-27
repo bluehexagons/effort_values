@@ -5,8 +5,8 @@ An effort value yield search and tracker for Pokémon. The app is a static site,
 ## Features
 
 * All of the Pokemon at the time (up to Arceus)
-* Namable party Pokemon and favorites tracking
-* One-click EV adding
+* Named trainee rows with six-stat EV tracking
+* One-click battle-yield adding to the selected trainee
 * Responsive layout for desktop and mobile browsers
 * Docked or floating panel layout with desktop drag-and-snap controls
 * Local autosave in browser storage
@@ -17,7 +17,7 @@ An effort value yield search and tracker for Pokémon. The app is a static site,
 
 ## Saving and sharing
 
-Your current search, filters, quick reference, and EV tracker are saved locally in the browser. Use **Share / Copy link** to create a link containing the current state; opening that link loads the shared state and also saves it on the new device.
+Your current search, filters, quick reference, trainees, selected trainee, and EV totals are saved locally in the browser. Use **Share setup** to create a link containing the current state; opening that link loads the shared state and also saves it on the new device.
 
 The current saved-state format is intentionally versioned and is not compatible with the original query-string links.
 

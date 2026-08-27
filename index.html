@@ -67,7 +67,7 @@ v1.1:
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#17324d" />
-<title>Effort Value Yield Search</title>
+<title>EV Yield Planner</title>
 <!--
 body{
 -moz-user-select: none;
@@ -231,6 +231,159 @@ td.columnclose,td.columnplus{min-width:40px;min-height:40px}
  .result-actions{justify-content:flex-start}
 }
 
+/* 2026 workflow redesign */
+:root{--ink:#17324d;--text:#17212b;--muted:#607181;--panel:#fff;--line:#d5dde4;--accent:#1769aa;--accent-dark:#0f568e;--accent-soft:#eaf4fb;--danger:#a33a3a;--shadow:0 10px 28px rgba(23,50,77,.08)}
+body{padding:0;background:#f4f7f9;color:var(--text)}
+#app{max-width:1480px;padding:28px 24px 20px}
+button,input,select{font:inherit}
+button,.button-link{min-height:42px;border:1px solid #aebdca;border-radius:8px;padding:7px 11px;background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;line-height:1.2}
+button:hover,.button-link:hover{border-color:var(--accent);background:var(--accent-soft)}
+.primary-action{border-color:var(--accent)!important;background:var(--accent)!important;color:#fff!important}
+.primary-action:hover{background:var(--accent-dark)!important}
+.quiet-button,.text-button{background:transparent;color:var(--muted)}
+.text-button{border:0;min-height:32px;padding:3px 6px;text-decoration:underline;text-underline-offset:3px}
+.icon-button{width:42px;padding:7px;flex:0 0 42px}
+.danger-button{color:var(--danger)}
+.text-link{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:.86rem;text-decoration:none}
+.text-link:hover{text-decoration:underline}
+.site-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:32px;margin-bottom:20px}
+.site-header h1{margin:0;color:#152d42;font-size:clamp(2rem,4vw,3.25rem);line-height:1.05;letter-spacing:-.035em}
+.intro{max-width:760px;margin:10px 0 0;color:var(--muted);font-size:1.05rem}
+.eyebrow{margin:0 0 4px;color:var(--accent);font-size:.72rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;max-width:470px}
+#save-status{flex-basis:100%;margin:0;text-align:right;color:var(--muted);font-size:.82rem}
+.control-card{background:var(--panel);border:1px solid var(--line)!important;border-radius:14px;padding:16px!important;box-shadow:var(--shadow);margin-bottom:20px!important}
+.search-main{display:grid;grid-template-columns:minmax(260px,1fr) auto minmax(260px,auto);align-items:end;gap:14px 20px}
+.search-field{display:flex;flex-direction:column;gap:6px;color:var(--ink);font-weight:750}
+.search-field input{width:100%!important;min-height:46px;border:1px solid #aebdca;border-radius:9px;padding:8px 12px}
+.search-count{display:flex;flex-direction:column;min-width:110px;padding-bottom:4px;color:var(--muted);font-size:.78rem}
+.search-count strong{color:var(--ink);font-size:1rem}
+.filter-toggles{display:flex;gap:14px;align-items:center;justify-content:flex-end;flex-wrap:wrap;padding-bottom:8px}
+.filter-toggles label,.advanced-settings label{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.9rem}
+.filter-toggles input,.advanced-settings input,.ev-toggle input{width:18px;height:18px;accent-color:var(--accent)}
+#ev-options{border:0!important;margin:14px 0 0!important;padding-top:14px;border-top:1px solid var(--line)!important}
+.ev-toggle{display:flex;align-items:flex-start;gap:9px;color:var(--ink)}
+.ev-toggle span{display:flex;flex-direction:column}
+.ev-toggle small{color:var(--muted);font-weight:400}
+.ev-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.filter-disclosure{display:none}
+.ev-filter{margin:12px 0 0 27px}
+.ev-filter-grid{display:grid;grid-template-columns:repeat(7,minmax(68px,1fr)) auto;gap:8px;align-items:end}
+.ev-filter-grid label{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:.75rem;font-weight:700}
+#evform.ev-filter input{width:100%!important;min-height:40px;border:1px solid #b8c5cf;border-radius:7px;padding:6px 8px;text-align:center}
+.clear-filters{white-space:nowrap}
+.filter-help{display:block;margin-top:7px;color:var(--muted);font-size:.78rem}
+.filter-help code,.ev-toggle code{padding:1px 4px;border-radius:4px;background:#edf2f5}
+#settings.advanced-settings{display:block!important;margin:12px 0 0!important;color:var(--muted);font-size:.86rem}
+.advanced-settings summary{cursor:pointer;width:max-content;color:var(--accent)}
+.advanced-settings>div{display:flex;gap:18px;flex-wrap:wrap;padding-top:9px}
+#main-layout{grid-template-columns:minmax(480px,1fr) minmax(600px,720px);gap:20px}
+#results{padding:14px;overflow:hidden;border-radius:12px;box-shadow:var(--shadow)}
+.results-heading{padding:0 2px 10px;border-bottom:1px solid var(--line)}
+.results-heading h2,.workspace-heading h2{margin:0;color:var(--ink);font-size:1.25rem}
+.selected-summary{display:inline-flex;margin-top:4px;padding:3px 7px;border-radius:999px;background:#f0f2f4;color:var(--muted);font-size:.72rem;font-weight:700}
+.selected-summary.has-selection{background:var(--accent-soft);color:var(--accent-dark)}
+.sort-controls{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.82rem}
+.sort-controls select{min-height:40px;border:1px solid #aebdca;border-radius:8px;padding:6px 28px 6px 9px;background:#fff;color:var(--ink)}
+.result-list{max-height:calc(100vh - 235px);padding:0 3px;scrollbar-gutter:stable}
+.result-card{grid-template-columns:minmax(180px,1fr) auto;grid-template-areas:"identity actions" "yields actions";gap:4px 12px;padding:12px 4px}
+.result-identity{grid-area:identity}
+.result-card>.ev-pills{grid-area:yields}
+.result-actions{grid-area:actions;align-self:center;max-width:310px}
+.result-actions button,.result-actions .button-link{min-height:36px;padding:5px 8px;font-size:.79rem}
+.sprite-wrap{width:44px;height:44px;flex-basis:44px}
+.sprite-wrap img{width:44px;height:44px}
+.ev-pills{display:flex;gap:5px;flex-wrap:wrap}
+.ev-pill{padding:3px 8px;background:#e8f2f8;color:#264b65;font-weight:700}
+.zero-yield{background:#f0f2f4;color:#7a8790;font-weight:500}
+#workspace-column{position:sticky;top:16px;min-width:0}
+.workspace-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:10px;padding:0 2px}
+.workspace-heading>div>p:last-child{margin:4px 0 0;color:var(--muted);font-size:.86rem}
+#arrange-controls{margin:0;justify-content:flex-end}
+#arrange-controls button{min-height:36px;padding:5px 8px;font-size:.78rem}
+#workspace{grid-template-columns:minmax(230px,.8fr) minmax(350px,1.2fr);gap:12px;margin-top:0}
+#quickchart,#evtracker{overflow:hidden;border-radius:12px;padding:0!important;box-shadow:var(--shadow)}
+#workspace.floating{min-height:680px}
+#workspace.floating #quickchart{width:calc(40% - 8px)}
+#workspace.floating #evtracker{width:calc(60% - 8px)}
+.panel-title{min-height:50px;padding:10px 12px;background:#f8fafb}
+.panel-title span{display:flex;align-items:center;gap:7px}
+.panel-title small{font-size:.76rem;text-align:right}
+.panel-footer{padding:10px 12px;background:#fbfcfd}
+.empty-state{padding:28px 18px;line-height:1.55}
+.quick-card{padding:12px;border-bottom-color:var(--line)}
+.quick-meta{align-items:flex-start}
+.quick-actions{justify-content:space-between;align-items:center;margin-top:10px}
+.quick-actions .primary-action{flex:1}
+.tracker-entry{padding:12px;border-bottom-color:var(--line);cursor:pointer;transition:background .15s,box-shadow .15s}
+.tracker-entry:hover{background:#fbfdfe}
+.tracker-entry.selected{outline:0;background:#f5fbff;box-shadow:inset 4px 0 0 var(--accent)}
+.tracker-head{margin:0 0 8px}
+.tracker-head .trainee-name{min-height:42px;border:1px solid #aebdca;border-radius:8px;padding:7px 9px;font-weight:750;color:var(--ink)}
+.tracker-selection{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.select-trainee{min-height:34px;padding:4px 8px;font-size:.78rem}
+.select-trainee[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-dark);font-weight:750}
+.tracker-total{color:var(--muted);font-size:.78rem}
+.tracker-total.over-limit{color:var(--danger);font-weight:750}
+.tracker-fields{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.tracker-field{gap:4px;color:var(--muted);font-size:.7rem;font-weight:700;text-align:left}
+.tracker-field input{min-height:40px!important;border:1px solid #b8c5cf;border-radius:7px;background:#fff;font-size:.95rem}
+.tracker-row-actions{display:flex;justify-content:flex-end;margin-top:5px}
+#evtracker .text-button{border:0;background:transparent;color:var(--muted)}
+#evtracker .danger-button{color:var(--danger)}
+#evtracker.needs-selection{animation:selection-pulse .7s ease}
+@keyframes selection-pulse{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 4px rgba(23,105,170,.25)}}
+#cc{margin-top:24px!important;font-size:.8rem}
+
+@media (max-width:1100px){
+ #main-layout{display:flex;flex-direction:column;gap:18px}
+ #workspace-column{order:-1;position:static}
+ #workspace{grid-template-columns:minmax(230px,.8fr) minmax(360px,1.2fr)}
+ .result-list{max-height:62vh}
+}
+@media (max-width:760px){
+ #app{padding:18px 12px}
+ .site-header{display:block;margin-bottom:16px}
+ .site-header h1{font-size:2.25rem}
+ .header-actions{justify-content:flex-start;max-width:none;margin-top:14px}
+ #save-status{text-align:left}
+ .control-card{padding:13px!important}
+ .search-main{grid-template-columns:1fr auto;gap:10px}
+ .search-field{grid-column:1 / -1}
+ .filter-toggles{grid-column:1 / -1;justify-content:flex-start;padding:2px 0 0}
+ .ev-filter{margin-left:0}
+ .filter-disclosure{display:inline-flex;min-height:36px;padding:5px 9px;font-size:.8rem;white-space:nowrap}
+ #ev-options:not(.filter-expanded) .ev-filter{display:none!important}
+ .ev-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .clear-filters{grid-column:1 / -1}
+ .workspace-heading{display:block}
+ #arrange-controls{display:none}
+ #workspace{grid-template-columns:1fr}
+ #evtracker{order:-1}
+ #workspace.floating{display:grid;min-height:0}
+ #workspace.floating #quickchart,#workspace.floating #evtracker{width:100%}
+ .panel-title small{display:none}
+ .result-list{max-height:none;overflow:visible}
+ .results-heading{position:sticky;top:0;z-index:4;margin:0 -6px;padding:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px)}
+ .result-card{grid-template-columns:1fr;grid-template-areas:"identity" "yields" "actions";gap:8px;padding:14px 4px}
+ .result-actions{max-width:none;display:grid;grid-template-columns:1fr 1fr}
+ .result-actions .button-link{grid-column:1 / -1}
+ .result-actions button,.result-actions .button-link{min-height:44px;font-size:.86rem}
+ .tracker-fields{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .quick-actions .primary-action{min-height:44px}
+ #cc img{display:none}
+}
+@media (max-width:390px){
+ .site-header h1{font-size:2rem}
+ .header-actions button{flex:1}
+ .search-main{grid-template-columns:1fr}
+ .search-count{display:flex;flex-direction:row;gap:4px;align-items:baseline}
+ .filter-toggles{display:grid;gap:8px}
+ .ev-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tracker-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tracker-selection{align-items:flex-start;flex-direction:column}
+}
+
 </style>
 <!--[if IE]>
 <style type="text/css">
@@ -297,6 +450,7 @@ var stateFromLink=false;
 var panelLayout={floating:false,quick:{x:0,y:0},tracker:{x:0,y:0}};
 var panelDrag=null;
 var PANEL_GAP=16;
+var filterFieldsExpanded=false;
 
 function checkMobile(a){return (/android|avantgo|blackberry|blazer|compal|elaine|fennec|hiptop|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile|o2|opera m(ob|in)i|palm( os)?|p(ixi|re)\/|plucker|pocket|psp|smartphone|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce; (iemobile|ppc)|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|e\-|e\/|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(di|rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)));}
 //script credit to http://detectmobilebrowser.com/ : open source mobile phone detection
@@ -351,10 +505,10 @@ function start() {
 	//$("innerbox").checked=false;
 	$("dse").checked=addDelay;
 	$("within-filter").checked=within;
-	$("showboost").checked=speedBoosts;
 	$("loadall").checked=loadall;
 	if (evsearch) $("evform").style.display="";
 	else $("evform").style.display="none";
+	updateFilterDisclosure();
 	hideWithin();
 	refreshQuick();
 	refreshTracker();
@@ -385,10 +539,13 @@ function safeRaw(raw) {
 function safeTracker(raw) {
 	if (typeof raw != "string") return null;
 	var parts=raw.split("/");
-	if (parts.length != 9) return null;
+	/* Version 2 stored EXP and a Pokédex number in tracker rows. Tracker rows are
+	   trainees, not species, so migrate those values away when old state is read. */
+	if (parts.length == 9) parts=[parts[0]].concat(parts.slice(2,8));
+	if (parts.length != 7) return null;
 	var name=parts.shift().replace(/[\\/]/g,"").slice(0,40);
 	var values=[];
-	for (var i=0;i<8;i++) {
+	for (var i=0;i<6;i++) {
 		var value=stateNumber(parts[i],0);
 		values.push(clamp(value,0,9999));
 	}
@@ -397,9 +554,10 @@ function safeTracker(raw) {
 function stateObject() {
 	processTracker();
 	return {
-		version:2,
+		version:3,
 		quickchart:quickchart.slice(0),
 		evtracker:evtracker.slice(0),
+		selected:evselect,
 		search:$("search").value,
 		evq:[$("exp").value,$("hp").value,$("atk").value,$("def").value,$("sat").value,$("sdf").value,$("spd").value],
 		settings:{within:within,always:always,evsearch:evsearch,addDelay:addDelay,loadall:loadall,movbuttons:movbuttons},
@@ -408,7 +566,7 @@ function stateObject() {
 	};
 }
 function applyState(state) {
-	if (!state || state.version != 2) return false;
+	if (!state || (state.version != 2 && state.version != 3)) return false;
 	var loadedQuick=[];
 	var loadedTracker=[];
 	for (var i=0;i<(state.quickchart || []).length;i++) {
@@ -421,6 +579,7 @@ function applyState(state) {
 	}
 	quickchart=loadedQuick;
 	evtracker=loadedTracker;
+	evselect=clamp(stateNumber(state.selected,-1),-1,evtracker.length-1);
 	if (typeof state.search == "string") $("search").value=state.search.slice(0,80);
 	var evq=state.evq || [];
 	var evids=["exp","hp","atk","def","sat","sdf","spd"];
@@ -499,11 +658,12 @@ function shareState() {
 	}
 }
 function resetState() {
-	if (!window.confirm("Clear the saved team and settings on this device?")) return;
+	if (!window.confirm("Clear saved trainees, reference Pokémon, and settings on this device?")) return;
 	localStorage.removeItem(STORAGE_KEY);
 	history.replaceState(null,"",window.location.href.split("#")[0]);
 	quickchart=[];
 	evtracker=[];
+	evselect=-1;
 	$("search").value="";
 	var evids=["exp","hp","atk","def","sat","sdf","spd"];
 	for (var i=0;i<evids.length;i++) $(evids[i]).value="";
@@ -606,6 +766,7 @@ function getCookie(c_name) { //lifted from w3schools example
 }
 function evs(stf) {
 	enter($("search"));
+	updateFilterDisclosure();
 	scheduleSave();
 }
 function altEnter(stf) {
@@ -685,8 +846,10 @@ function enter(stf) {
 	$("stuff").innerHTML=stuff || "<div class='empty-state'>No additional matches.</div>";
 	time=new Date();
 	var end=(time.getMilliseconds()+time.getSeconds()*1000+time.getMinutes()*60000);
-	$("count").innerHTML=count+"/"+(count2+count)+" in "+(end-start)+"ms";
-	$("count2").innerHTML=count2;
+	var visibleExact=$("pure").querySelectorAll(".result-card").length;
+	var visibleWithin=$("stuff").querySelectorAll(".result-card").length;
+	$("count").textContent=visibleExact+visibleWithin;
+	$("count2").textContent=visibleWithin;
 	lastlen=text.length;
 	updateBars();
 	//if ($("quickchart").style.top > document.body.offsetWidth) $("quickchart").style.top=document.body.offsetWidth-100;
@@ -886,13 +1049,7 @@ function pushUp(a,b) {
 	$("evtracker").style.zIndex=b;
 }
 function evplus(id) {
-	if (evselect >= 0) {
-		var i=id.id.split("/")[1];
-		var splitted=evtracker[evselect].split("/");
-		var pokeraw=quickchart[i].split("/");
-		evtracker[evselect]=splitted[0]+"/"+(parseInt(splitted[1])+parseInt(pokeraw[1]))+"/"+(parseInt(splitted[2])+parseInt(pokeraw[2]))+"/"+(parseInt(splitted[3])+parseInt(pokeraw[3]))+"/"+(parseInt(splitted[4])+parseInt(pokeraw[4]))+"/"+(parseInt(splitted[5])+parseInt(pokeraw[5]))+"/"+(parseInt(splitted[6])+parseInt(pokeraw[6]))+"/"+(parseInt(splitted[7])+parseInt(pokeraw[7]))+"/"+splitted[8];
-		refreshTracker();
-	}
+	addYieldByRaw(quickchart[id.id.split("/")[1]]);
 }
 function refreshTracker() {
 	var quickheader="<tr><th colspan='10' class='panel-drag-handle' style='text-align:left;cursor:grab' onpointerdown='startPanelDrag(event,\"evtracker\")'>EV Tracker<div style='display:inline;float:right'>Drag header to move</div></th></tr>";
@@ -949,6 +1106,7 @@ var trackerArray=new Array();
 function typeTracker(id) {
 	trackerTyped=true;
 	processTracker();
+	updateSelectedSummary();
 	resizeInput(id);
 	colsize=Math.min($("quickchart").offsetWidth,$("evtracker").offsetWidth);
 	updateBars();
@@ -1020,32 +1178,40 @@ function iconSvg(name) {
 		trash:"<path d='M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3'/>",
 		close:"<path d='M6 6l12 12M18 6L6 18'/>",
 		share:"<path d='M12 16V3M7 8l5-5 5 5'/><path d='M5 13v7h14v-7'/>",
+		external:"<path d='M14 4h6v6M20 4l-9 9'/><path d='M18 13v7H4V6h7'/>",
+		check:"<path d='M5 12l4 4L19 6'/>",
 		move:"<path d='M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4'/>"
 	};
 	return "<svg class='icon' viewBox='0 0 24 24' aria-hidden='true'>"+paths[name]+"</svg>";
 }
 function spriteMarkup(pokeraw) {
 	var number=pokeraw.split("/")[8];
-	return "<span class='sprite-wrap'><img src='"+imageByRaw(pokeraw)+"' alt='' width='40' height='40' onerror=\"this.hidden=true;this.nextElementSibling.style.display='inline-flex'\" /><span class='sprite-fallback' aria-hidden='true'>◈</span></span>";
+	return "<span class='sprite-wrap'><img src='"+imageByRaw(pokeraw)+"' alt='' width='40' height='40' loading='lazy' decoding='async' onerror=\"this.hidden=true;this.nextElementSibling.style.display='inline-flex'\" /><span class='sprite-fallback' aria-hidden='true'>◈</span></span>";
 }
 function evPills(pokeraw) {
 	var parts=pokeraw.split("/");
-	var labels=["EXP","HP","Atk","Def","SAt","SDf","Spd"];
+	var labels=["HP","Atk","Def","SAt","SDf","Spd"];
 	var result="";
-	for (var i=1;i<8;i++) result+="<span class='ev-pill'>"+labels[i-1]+" "+parts[i]+"</span>";
-	return result;
+	for (var i=2;i<8;i++) {
+		if (parseInt(parts[i],10)>0) result+="<span class='ev-pill'>+"+parts[i]+" "+labels[i-2]+"</span>";
+	}
+	return result || "<span class='ev-pill zero-yield'>No EV yield</span>";
+}
+function bulbapediaUrl(name) {
+	return "https://bulbapedia.bulbagarden.net/wiki/"+encodeURIComponent(name)+"_(Pok%C3%A9mon)";
 }
 function resultCard(pokeraw,dim,ignoreFilter) {
 	if (!ignoreFilter && evsearch && !checkEVs(pokeraw)) return "";
 	var parts=pokeraw.split("/");
 	var number=escapeAttribute(parts[8]);
 	var classes="result-card"+(dim != null ? " dim" : "");
-	return "<article class='"+classes+"' data-number='"+number+"' draggable='true' ondragstart='dragPokemon(event)' title='Drag to a panel, or use an action button'>"+
-		"<div class='result-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+escapeHtml(parts[8])+"</small></div></div>"+
+	var total=totalEVs(pokeraw);
+	return "<article class='"+classes+"' data-number='"+number+"' draggable='true' ondragstart='dragPokemon(event)' title='Drag to Quick Reference or add its yield to the selected trainee'>"+
+		"<div class='result-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+escapeHtml(parts[8])+" · "+escapeHtml(parts[1])+" EXP</small></div></div>"+
 		"<div class='result-actions'>"+
-		"<button type='button' onclick='addQuickByNumber(\""+number+"\")' title='Add to Quick Reference'>"+iconSvg("plus")+" Quick add</button>"+
-		"<button type='button' onclick='addTrackerByNumber(\""+number+"\")' title='Add a new tracker row'>"+iconSvg("list")+" Track</button>"+
-		"<button type='button' onclick='showInfoByNumber(\""+number+"\")'>"+iconSvg("info")+" Details</button>"+
+		"<button type='button' onclick='addQuickByNumber(\""+number+"\")' title='Add to Quick Reference'>"+iconSvg("plus")+" Reference</button>"+
+		"<button type='button' class='primary-action' onclick='addYieldByNumber(\""+number+"\")' title='Add this battle yield to the selected trainee'>"+iconSvg("plus")+" Add "+total+" EV"+(total==1 ? "" : "s")+"</button>"+
+		"<a class='button-link' href='"+bulbapediaUrl(parts[0])+"' target='_blank' rel='noopener noreferrer'>"+iconSvg("external")+" Bulbapedia</a>"+
 		"</div>"+
 		"<div class='ev-pills'>"+evPills(pokeraw)+"</div>"+
 		"</article>";
@@ -1217,12 +1383,7 @@ function inRect(x,y,x2,y2,w,h) {
 	return false;
 }
 function addEVs(id) {
-	if (evselect > -1) {
-		var pokeraw=rawByName(decodeURIComponent(id.id.split("/")[1])).split("/");
-		var splitted=evtracker[evselect].split("/");
-		evtracker[evselect]=splitted[0]+"/"+(parseInt(splitted[1])+parseInt(pokeraw[1]))+"/"+(parseInt(splitted[2])+parseInt(pokeraw[2]))+"/"+(parseInt(splitted[3])+parseInt(pokeraw[3]))+"/"+(parseInt(splitted[4])+parseInt(pokeraw[4]))+"/"+(parseInt(splitted[5])+parseInt(pokeraw[5]))+"/"+(parseInt(splitted[6])+parseInt(pokeraw[6]))+"/"+(parseInt(splitted[7])+parseInt(pokeraw[7]))+"/"+splitted[8];
-		refreshTracker();
-	}
+	addYieldByRaw(rawByName(decodeURIComponent(id.id.split("/")[1])));
 }
 function addQuickByNumber(number) {
 	var raw=rawByNumber(number);
@@ -1237,14 +1398,26 @@ function addQuickByNumber(number) {
 	refreshQuick();
 	setSaveStatus(raw.split("/")[0]+" added to Quick Reference");
 }
-function addTrackerByNumber(number) {
-	var raw=rawByNumber(number);
-	if (!raw) return;
-	var parts=raw.split("/");
-	evtracker.push(parts[0]+"/0/0/0/0/0/0/0/"+parts[8]);
-	evselect=evtracker.length-1;
+function addYieldByNumber(number) {
+	return addYieldByRaw(rawByNumber(number));
+}
+function addYieldByRaw(raw) {
+	if (!raw) return false;
+	if (evselect < 0 || evselect >= evtracker.length) {
+		setSaveStatus("Select a trainee before adding a battle yield");
+		$("evtracker").classList.add("needs-selection");
+		setTimeout(function(){if ($("evtracker")) $("evtracker").classList.remove("needs-selection");},700);
+		return false;
+	}
+	processTracker();
+	var yieldParts=raw.split("/");
+	var trainee=evtracker[evselect].split("/");
+	for (var i=1;i<=6;i++) trainee[i]=stateNumber(trainee[i],0)+stateNumber(yieldParts[i+1],0);
+	evtracker[evselect]=trainee.join("/");
+	var traineeName=trainee[0] || "Selected trainee";
 	refreshTracker();
-	setSaveStatus(parts[0]+" added to EV Tracker");
+	setSaveStatus(yieldParts[0]+" added "+totalEVs(raw)+" EV"+(totalEVs(raw)==1 ? "" : "s")+" to "+traineeName);
+	return true;
 }
 var draggedPokemonNumber="";
 function dragPokemon(event) {
@@ -1267,7 +1440,7 @@ function dropPokemon(event,target) {
 	clearPokemonDrop(event);
 	var number=(event.dataTransfer && event.dataTransfer.getData("text/plain")) || draggedPokemonNumber;
 	if (target == "quickchart") addQuickByNumber(number);
-	if (target == "evtracker") addTrackerByNumber(number);
+	if (target == "evtracker") addYieldByNumber(number);
 }
 function showInfoByNumber(number) {
 	var raw=rawByNumber(number);
@@ -1358,9 +1531,32 @@ function sevs(id) {
 	evsearch=id.checked;
 	optimize=pokemon;
 	enter($("search"));
-	if (evsearch) $("evform").style.display="";
+	if (evsearch) {
+		$("evform").style.display="";
+		if (window.innerWidth<=760) filterFieldsExpanded=true;
+	}
 	else $("evform").style.display="none";
+	updateFilterDisclosure();
 	scheduleSave();
+}
+function activeYieldFilterCount() {
+	var ids=["exp","hp","atk","def","sat","sdf","spd"];
+	var count=0;
+	for (var i=0;i<ids.length;i++) if ($(ids[i]).value.trim() != "") count++;
+	return count;
+}
+function updateFilterDisclosure() {
+	var options=$("ev-options");
+	var button=$("toggle-filter-fields");
+	if (!options || !button) return;
+	options.classList.toggle("filter-expanded",filterFieldsExpanded);
+	button.setAttribute("aria-expanded",filterFieldsExpanded ? "true" : "false");
+	var count=activeYieldFilterCount();
+	button.textContent=(filterFieldsExpanded ? "Hide values" : "Edit values")+(count ? " ("+count+")" : "");
+}
+function toggleFilterFields() {
+	filterFieldsExpanded=!filterFieldsExpanded;
+	updateFilterDisclosure();
 }
 function hideWithin() {
 	if ((!always) && (within)) $("within").style.display="";
@@ -1432,17 +1628,18 @@ function $(id) {
    focused renderers are the active UI: actions are always visible, so adding a
    Pokémon never depends on drag-and-drop. */
 function modernRefreshQuick() {
-	var html="<div class='panel-title panel-drag-handle' onpointerdown='startPanelDrag(event,\"quickchart\")'><span>"+iconSvg("list")+" Quick Reference</span><small>Drag to move</small></div>";
-	if (quickchart.length == 0) html+="<div class='empty-state'>Use Quick add on any result.</div>";
+	var html="<div class='panel-title panel-drag-handle' onpointerdown='startPanelDrag(event,\"quickchart\")'><span>"+iconSvg("list")+" Quick Reference</span><small>Battle yields</small></div>";
+	if (quickchart.length == 0) html+="<div class='empty-state'><strong>No reference Pokémon yet.</strong><br />Use Reference on a result to keep its yield handy.</div>";
 	for (var i=0;i<quickchart.length;i++) html+=modernQuickCard(quickchart[i],i);
-	html+="<div class='panel-footer'><button type='button' onclick='shareState()'>"+iconSvg("share")+" Share</button><button type='button' onclick='quickchart=[];refreshQuick()'>"+iconSvg("trash")+" Clear</button></div>";
+	if (quickchart.length) html+="<div class='panel-footer'><button type='button' class='quiet-button' onclick='quickchart=[];refreshQuick()'>"+iconSvg("trash")+" Clear reference</button></div>";
 	$("quickchart").innerHTML=html;
 	applyPanelLayout();
 	scheduleSave();
 }
 function modernQuickCard(pokeraw,index) {
 	var parts=pokeraw.split("/");
-	return "<article class='quick-card'><div class='quick-meta'><div class='quick-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+parts[8]+"</small></div></div><div class='quick-actions'><button type='button' id='plus/"+index+"' onclick='evplus(this)' title='Add this yield to the selected tracker row'>"+iconSvg("plus")+" "+totalEVs(pokeraw)+" EVs</button><button type='button' onclick='removeQuickIndex("+index+")' aria-label='Remove "+escapeAttribute(parts[0])+"'>"+iconSvg("trash")+"</button></div></div><div class='ev-pills'>"+evPills(pokeraw)+"</div></article>";
+	var total=totalEVs(pokeraw);
+	return "<article class='quick-card' data-number='"+escapeAttribute(parts[8])+"' draggable='true' ondragstart='dragPokemon(event)'><div class='quick-meta'><div class='quick-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+parts[8]+" · "+parts[1]+" EXP</small></div></div><button type='button' class='icon-button' onclick='removeQuickIndex("+index+")' aria-label='Remove "+escapeAttribute(parts[0])+"'>"+iconSvg("trash")+"</button></div><div class='ev-pills'>"+evPills(pokeraw)+"</div><div class='quick-actions'><button type='button' class='primary-action' id='plus/"+index+"' onclick='evplus(this)' title='Add this battle yield to the selected trainee'>"+iconSvg("plus")+" Add "+total+" EV"+(total==1 ? "" : "s")+"</button><a class='text-link' href='"+bulbapediaUrl(parts[0])+"' target='_blank' rel='noopener noreferrer'>Bulbapedia "+iconSvg("external")+"</a></div></article>";
 }
 function modernProcessTracker() {
 	var entries=[];
@@ -1458,31 +1655,75 @@ function modernProcessTracker() {
 }
 function modernTrackerCard(pokeraw,row) {
 	var parts=pokeraw.split("/");
-	var labels=["EXP","HP","Atk","Def","SAt","SDf","Spd","#"];
+	var labels=["HP","Attack","Defense","Sp. Atk","Sp. Def","Speed"];
 	var fields="";
-	for (var i=1;i<9;i++) fields+="<label class='tracker-field'>"+labels[i-1]+"<input type='number' inputmode='numeric' min='0' max='9999' value='"+escapeAttribute(parts[i])+"' onfocus='evselect="+row+"' oninput='typeTracker(this)' /></label>";
-	return "<article id='tracker/"+row+"' class='tracker-entry"+(String(evselect) == String(row) ? " selected" : "")+"'><div class='tracker-head'><input type='text' value='"+escapeAttribute(parts[0])+"' aria-label='Tracker name' onfocus='evselect="+row+"' oninput='typeTracker(this)' /><button type='button' onclick='removeTrackerIndex("+row+")' aria-label='Remove tracker row'>"+iconSvg("trash")+"</button></div><div class='tracker-fields'>"+fields+"</div></article>";
+	var total=0;
+	for (var i=1;i<=6;i++) {
+		total+=stateNumber(parts[i],0);
+		fields+="<label class='tracker-field'><span>"+labels[i-1]+"</span><input type='number' inputmode='numeric' min='0' max='9999' value='"+escapeAttribute(parts[i])+"' onfocus='selectTrackerRow("+row+")' oninput='typeTracker(this)' /></label>";
+	}
+	var selected=String(evselect) == String(row);
+	return "<article id='tracker/"+row+"' class='tracker-entry"+(selected ? " selected" : "")+"' onclick='selectTrackerRow("+row+")'><div class='tracker-head'><input class='trainee-name' type='text' value='"+escapeAttribute(parts[0])+"' placeholder='Trainee name' aria-label='Trainee name' onfocus='selectTrackerRow("+row+")' oninput='typeTracker(this)' /><button type='button' class='icon-button danger-button' onclick='event.stopPropagation();removeTrackerIndex("+row+")' aria-label='Remove trainee'>"+iconSvg("trash")+"</button></div><div class='tracker-selection'><button type='button' class='select-trainee' aria-pressed='"+(selected ? "true" : "false")+"' onclick='event.stopPropagation();selectTrackerRow("+row+")'>"+(selected ? iconSvg("check")+" Selected trainee" : "Select trainee")+"</button><span class='tracker-total"+(total>510 ? " over-limit" : "")+"'>"+total+" total EVs</span></div><div class='tracker-fields'>"+fields+"</div><div class='tracker-row-actions'><button type='button' class='text-button' onclick='event.stopPropagation();resetTrackerRow("+row+")'>Reset EVs</button></div></article>";
 }
 function modernRefreshTracker() {
-	var html="<div class='panel-title panel-drag-handle' onpointerdown='startPanelDrag(event,\"evtracker\")'><span>"+iconSvg("list")+" EV Tracker</span><small>Tap a row to select it</small></div>";
-	if (evtracker.length == 0) html+="<div class='empty-state'>Add a Pokémon with Track, then enter your progress.</div>";
+	var html="<div class='panel-title panel-drag-handle' onpointerdown='startPanelDrag(event,\"evtracker\")'><span>"+iconSvg("list")+" Training Tracker</span><small>Select who receives yields</small></div>";
+	if (evtracker.length == 0) html+="<div class='empty-state'><strong>No trainees yet.</strong><br />Add a row, name the Pokémon you are training, then select it.</div>";
 	for (var i=0;i<evtracker.length;i++) html+=modernTrackerCard(evtracker[i],i);
-	html+="<div class='panel-footer'><button type='button' onclick='addTracker()'>"+iconSvg("plus")+" Blank row</button><button type='button' onclick='shareState()'>"+iconSvg("share")+" Share</button></div>";
+	html+="<div class='panel-footer'><button type='button' class='primary-action' onclick='addTracker()'>"+iconSvg("plus")+" Add trainee</button></div>";
 	$("evtracker").innerHTML=html;
+	updateSelectedSummary();
 	applyPanelLayout();
 	scheduleSave();
 }
 function modernRemoveTracker(index) {
 	evtracker.splice(index,1);
-	if (evselect >= evtracker.length) evselect=evtracker.length-1;
+	if (index < evselect) evselect--;
+	else if (index == evselect) evselect=Math.min(index,evtracker.length-1);
 	refreshTracker();
 }
 function modernAddTracker() {
-	evtracker.push("/0/0/0/0/0/0/0/0");
+	evtracker.push("/0/0/0/0/0/0");
 	evselect=evtracker.length-1;
 	refreshTracker();
 	var row=$("tracker/"+evselect);
 	if (row) row.getElementsByTagName("input")[0].select();
+}
+function selectTrackerRow(index) {
+	if (index < 0 || index >= evtracker.length) return;
+	processTracker();
+	evselect=index;
+	var rows=$("evtracker").querySelectorAll(".tracker-entry");
+	for (var i=0;i<rows.length;i++) {
+		var selected=i==index;
+		rows[i].classList.toggle("selected",selected);
+		var button=rows[i].querySelector(".select-trainee");
+		if (button) {
+			button.setAttribute("aria-pressed",selected ? "true" : "false");
+			button.innerHTML=selected ? iconSvg("check")+" Selected trainee" : "Select trainee";
+		}
+	}
+	setSaveStatus((evtracker[index].split("/")[0] || "Trainee")+" selected");
+	updateSelectedSummary();
+	scheduleSave();
+}
+function updateSelectedSummary() {
+	var summary=$("selected-trainee-summary");
+	if (!summary) return;
+	if (evselect >= 0 && evselect < evtracker.length) {
+		summary.textContent="Adding to: "+(evtracker[evselect].split("/")[0] || "Unnamed trainee");
+		summary.classList.add("has-selection");
+	} else {
+		summary.textContent="Select a trainee to add yields";
+		summary.classList.remove("has-selection");
+	}
+}
+function resetTrackerRow(index) {
+	processTracker();
+	if (!evtracker[index]) return;
+	var name=evtracker[index].split("/")[0];
+	evtracker[index]=name+"/0/0/0/0/0/0";
+	refreshTracker();
+	setSaveStatus((name || "Trainee")+" EVs reset");
 }
 function modernInfo(name) {
 	var pokeraw=rawByName(name);
@@ -1495,6 +1736,8 @@ function modernInfo(name) {
 function refreshQuick() { modernRefreshQuick(); }
 function refreshTracker() { modernRefreshTracker(); }
 function processTracker() { modernProcessTracker(); }
+function removeQuickIndex(index) { quickchart.splice(index,1); refreshQuick(); }
+function removeTrackerIndex(index) { modernRemoveTracker(index); }
 function removeTracker(id) { modernRemoveTracker(parseInt(id.id.split("/")[1],10)); }
 function addTracker() { modernAddTracker(); }
 function genInfo(name) { return modernInfo(name); }
@@ -1505,64 +1748,54 @@ function genInfo(name) { return modernInfo(name); }
 <h1>JavaScript is required to use the effort value tracker.</h1>
 </noscript>
 <main id="app">
-<header>
-<h1>Effort Value Yield Search</h1>
-<p class="intro">Search Pokémon by the effort values they yield, save a training list, and share it with a link.</p>
-</header>
-<section id="settings" aria-label="Settings">
+<header class="site-header">
 <div>
-<label><input id="showboost" type="checkbox" onclick="sboost(this)" /> View misc tweaks</label>
-<div id="speedtweaks" style="display:none">
-<label><input id="dse" type="checkbox" onclick="dsearch(this)" /> Delay search</label><br />
-<label><input id="loadall" type="checkbox" onclick="tloadall(this)" /> Load all</label><br />
+<p class="eyebrow">Pokémon training utility</p>
+<h1>EV Yield Planner</h1>
+<p class="intro">Find battle yields, keep a quick reference, and apply EVs to the Pokémon you are training.</p>
+</div>
+<div class="header-actions">
+<button type="button" onclick="shareState()">Share setup</button>
+<button type="button" class="quiet-button" onclick="resetState()">Reset data</button>
+<span id="save-status" role="status" aria-live="polite">Loading saved data…</span>
+</div>
+</header>
+<section id="search-controls" class="control-card" aria-label="Search and filters">
+<div class="search-main">
+<label class="search-field" for="search"><span>Find a Pokémon</span><input id="search" type="search" autocomplete="off" placeholder="Pikachu or Bulbasaur…" oninput="enters(this)" /></label>
+<div class="search-count"><strong id="count">Loading...</strong><span>matching yields</span></div>
+<div class="filter-toggles">
+<label><input id="within-filter" type="checkbox" onclick="withins(this)" /> Match anywhere in name</label>
+<label><input id="showall" type="checkbox" onclick="shows(this)" /> Dim non-matches</label>
 </div>
 </div>
 <div id="ev-options">
-<label><input id="byev" type="checkbox" onclick="sevs(this)" /> Filter by EVs</label>
-<div id="evform" style="display:;">
-<table style="border-bottom:1px solid #000000">
-<tr>
-<th class="evsort" onclick="clearEVs()">EXP</th><th class="evsort" onclick="setEVs('hp')">HP</th><th class="evsort" onclick="setEVs('atk')">Atk</th><th class="evsort" onclick="setEVs('def')">Def</th><th class="evsort" onclick="setEVs('sat')">SAt</th><th class="evsort" onclick="setEVs('sdf')">SDf</th><th class="evsort" onclick="setEVs('spd')">Spd</th><th onclick="evhelp()"><a href="javascript:">Advanced</a></th>
-</tr>
-<tr>
-<td><input id="exp" type="text" style="width:30px" onkeyup="evs(this)" value="" /></td>
-<td><input id="hp" type="text" style="width:30px" onkeyup="evs(this)" value="" /></td>
-<td><input id="atk" type="text" style="width:30px" onkeyup="evs(this)" value="" /></td>
-<td><input id="def" type="text" style="width:30px" onkeyup="evs(this)" value="" /></td>
-<td><input id="sat" type="text" style="width:30px" onkeyup="evs(this)" value="" /></td>
-<td><input id="sdf" type="text" style="width:30px" onkeyup="evs(this)" value="" /></td>
-<td><input id="spd" type="text" style="width:30px" onkeyup="evs(this)" value="" /></td>
-<td id="evhelp"></td>
-</tr>
-</table>
+<div class="ev-toggle-row"><label class="ev-toggle"><input id="byev" type="checkbox" onclick="sevs(this)" /> <span><strong>Filter by yield</strong><small>Use an exact number, <code>2+</code>, or <code>1-</code>.</small></span></label><button id="toggle-filter-fields" type="button" class="quiet-button filter-disclosure" aria-expanded="false" onclick="toggleFilterFields()">Edit values</button></div>
+<div id="evform" class="ev-filter">
+<div class="ev-filter-grid">
+<label><span>EXP</span><input id="exp" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<label><span>HP</span><input id="hp" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<label><span>Attack</span><input id="atk" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<label><span>Defense</span><input id="def" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<label><span>Sp. Atk</span><input id="sat" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<label><span>Sp. Def</span><input id="sdf" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<label><span>Speed</span><input id="spd" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<button type="button" class="quiet-button clear-filters" onclick="clearEVs()">Clear yield filters</button>
+</div>
+<span id="evhelp" class="filter-help">Examples: <code>2+</code> means at least 2; <code>1-</code> means at most 1.</span>
 </div>
 </div>
-</section>
-<section id="search-controls" aria-label="Search and saving">
-<label><input id="within-filter" type="checkbox" onclick="withins(this)" /> Search within</label>
-<label><input id="showall" type="checkbox" onclick="shows(this)" /> Show all</label>
-<button type="button" onclick="shareState()">Share / Copy link</button>
-<button type="button" onclick="resetState()">Reset saved data</button>
-<span id="save-status" role="status" aria-live="polite">Loading saved data…</span>
-<br /><br />
-<label for="search">Name:</label> <input id="search" type="search" autocomplete="off" oninput="enters(this)" style="width:200px" /> (<span id="count">Loading...</span>)
+<details id="settings" class="advanced-settings">
+<summary>More search options</summary>
+<div><label><input id="dse" type="checkbox" onclick="dsearch(this)" /> Delay search while typing</label><label><input id="loadall" type="checkbox" onclick="tloadall(this)" /> Show all when search is empty</label></div>
+</details>
 </section>
 <!--<input id="innerbox" type="checkbox" checked="false" onclick="ibox(this)" />Show inner box<br />-->
 <div id="main-layout">
 <section id="results" aria-label="Search results">
 <div class="results-heading">
-<h2>Yield results</h2>
-<div class="sort-controls" aria-label="Sort results">
-<button type="button" onclick="sort(0)">Name</button>
-<button type="button" onclick="sort(8)">#</button>
-<button type="button" onclick="sort(1)">EXP</button>
-<button type="button" onclick="sort(2)">HP</button>
-<button type="button" onclick="sort(3)">Atk</button>
-<button type="button" onclick="sort(4)">Def</button>
-<button type="button" onclick="sort(5)">SAt</button>
-<button type="button" onclick="sort(6)">SDf</button>
-<button type="button" onclick="sort(7)">Spd</button>
-</div>
+<div><p class="eyebrow">Battle sources</p><h2>Yield results</h2><span id="selected-trainee-summary" class="selected-summary">Select a trainee to add yields</span></div>
+<div class="sort-controls" aria-label="Sort results"><label for="result-sort">Sort by</label><select id="result-sort" onchange="sort(parseInt(this.value,10))"><option value="8">Pokédex #</option><option value="0">Name</option><option value="1">EXP</option><option value="2">HP</option><option value="3">Attack</option><option value="4">Defense</option><option value="5">Sp. Atk</option><option value="6">Sp. Def</option><option value="7">Speed</option></select><button type="button" class="icon-button" onclick="sort(sortColumn)" title="Reverse sort" aria-label="Reverse sort">↕</button></div>
 </div>
 <div id="exact">
 <div id="pure" class="result-list" onmouseover="closeboxy()"></div>
@@ -1573,17 +1806,18 @@ Within: (<span id="count2">Loading...</span>)
 </div>
 </section>
 <div id="workspace-column">
+<div class="workspace-heading"><div><p class="eyebrow">Your session</p><h2>Training workspace</h2><p>Choose a trainee, then add yields from results or the reference list.</p></div>
 <div id="arrange-controls" aria-label="Panel arrangement">
-<span>Panel layout:</span>
 <button type="button" id="toggle-float" onclick="togglePanelLayout()">Float panels</button>
-<button type="button" onclick="snapPanels()">Snap panels</button>
+<button type="button" class="quiet-button" onclick="snapPanels()">Reset layout</button>
+</div>
 </div>
 <section id="workspace" aria-label="Saved lists">
 <div id="quickchart" onmouseover="closeboxy()" ondragover="allowPokemonDrop(event)" ondragleave="clearPokemonDrop(event)" ondrop="dropPokemon(event,'quickchart')">
 Use Quick add on any result.
 </div>
 <div id="evtracker" onmouseover="closeboxy()" ondragover="allowPokemonDrop(event)" ondragleave="clearPokemonDrop(event)" ondrop="dropPokemon(event,'evtracker')">
-Add a Pokémon with Track, then enter your progress.
+Add a trainee, select it, then apply battle yields.
 </div>
 </section>
 </div>
