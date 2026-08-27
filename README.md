@@ -1,30 +1,41 @@
-# effort_values
+# EV Yield Planner
 
-An effort value yield search and tracker for Pokémon. The app is a static site, so it can be hosted directly on GitHub Pages.
+A static Pokémon effort-value yield search and training tracker. It supports responsive layouts, local autosave, shareable setup links, quick-reference lists, and multiple named trainees.
 
-## Features
+## Development
 
-* All of the Pokemon at the time (up to Arceus)
-* Named trainee rows with six-stat EV tracking
-* One-click battle-yield adding to the selected trainee
-* Responsive layout for desktop and mobile browsers
-* Docked or floating panel layout with desktop drag-and-snap controls
-* Local autosave in browser storage
-* Shareable state links using a versioned URL hash
-* Drag-and-drop on desktop, with tap-friendly add controls on touch devices
-* Sprites taken from somewhere, possibly Bulbapedia
-* Still-working Bulbapedia links
+The project uses TypeScript 7's native compiler, Vite, Vitest, and Biome. Node.js 22 or newer is recommended.
 
-## Saving and sharing
+```sh
+npm install
+npm run dev
+```
 
-Your current search, filters, quick reference, trainees, selected trainee, and EV totals are saved locally in the browser. Use **Share setup** to create a link containing the current state; opening that link loads the shared state and also saves it on the new device.
+Useful commands:
 
-The current saved-state format is intentionally versioned and is not compatible with the original query-string links.
+- `npm run build` — type-check with TypeScript 7 and create the production bundle
+- `npm test` — run the unit test suite once
+- `npm run check` — lint, format-check, and type-check the project
+- `npm run check:fix` — apply safe formatting and lint fixes
+- `npm run preview` — serve the production build locally
+
+## Structure
+
+- `src/data.ts` loads and parses the XML Pokémon dataset.
+- `src/types.ts` defines the domain and persisted-state models.
+- `src/search.ts` contains pure filtering and sorting logic.
+- `src/storage.ts` validates, migrates, saves, and shares app state.
+- `src/render.ts` renders results, reference entries, trainees, and details.
+- `src/main.ts` coordinates state, browser events, and UI updates.
+- `src/styles.css` contains the responsive presentation layer.
+- `public/` contains the XML dataset, sprites, and favicon copied into builds.
+
+Saved state is validated at the browser boundary. The current v4 format automatically migrates compatible v2 and v3 state from existing installations and shared links.
+
+## Deployment
+
+`npm run build` writes the deployable static site to `dist/`. Vite uses relative asset paths, so the output works from a GitHub Pages project subdirectory as well as a domain root.
 
 ## License
 
-All Pokemon-related things are owned by their respective Pokemon-related intellectual property owners,
-such as The Pokémon Company.
-
-This codebase is licensed under the Apache license. For historic reasons, I left in the original
-Creative Commons GPL 2.0 license banner, which can be used too.
+Pokémon-related names and assets belong to their respective owners. The codebase is licensed under the Apache License; see [LICENSE](LICENSE).
