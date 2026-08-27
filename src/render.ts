@@ -100,7 +100,7 @@ export const renderTracker = (
         .join("");
       const total = statKeys.reduce((sum, stat) => sum + trainee.evs[stat], 0);
       return `<article class="tracker-entry${selected ? " selected" : ""}" data-trainee-id="${escapeHtml(trainee.id)}">
-      <div class="tracker-head"><input class="trainee-name" type="text" value="${escapeHtml(trainee.name)}" placeholder="Trainee name" aria-label="Trainee name" data-field="name" /><button type="button" class="icon-button danger-button" data-action="remove-trainee" aria-label="Remove trainee">${icon("trash")}</button></div>
+      <div class="tracker-head"><input class="trainee-name" type="text" value="${escapeHtml(trainee.name)}" maxlength="40" placeholder="Trainee name" aria-label="Trainee name" data-field="name" /><button type="button" class="icon-button danger-button" data-action="remove-trainee" aria-label="Remove trainee">${icon("trash")}</button></div>
       <div class="tracker-selection"><button type="button" class="select-trainee" data-action="select-trainee" aria-pressed="${selected}">${selected ? `${icon("check")} Selected trainee` : "Select trainee"}</button><span class="tracker-total${total > 510 ? " over-limit" : ""}">${total} total EVs</span></div>
       <div class="tracker-fields">${fields}</div><div class="tracker-row-actions"><button type="button" class="text-button" data-action="reset-trainee">Reset EVs</button></div>
     </article>`;
@@ -121,7 +121,7 @@ export const renderDetails = (
         `<div class="detail-form"><strong>${escapeHtml(form.name)}</strong><div class="ev-pills">${pills(form)}</div></div>`,
     )
     .join("");
-  return `<div class="info-card"><div class="panel-title"><span class="quick-identity">${sprite(pokemon)} ${escapeHtml(pokemon.name)}</span><button type="button" data-action="close-details" aria-label="Close details">${icon("close")}</button></div>
+  return `<div class="info-card"><div class="panel-title"><span id="details-title" class="quick-identity">${sprite(pokemon)} ${escapeHtml(pokemon.name)}</span><button type="button" data-action="close-details" aria-label="Close details">${icon("close")}</button></div>
     <div class="detail-summary"><p><strong>${pokemon.exp} EXP</strong> · ${totalYield(pokemon)} total EVs</p><div class="ev-pills">${pills(pokemon)}</div></div>
     ${formCards ? `<h3>Special forms</h3>${formCards}` : ""}
     <p><a href="${bulbapediaUrl(pokemon.name)}" target="_blank" rel="noopener noreferrer">${escapeHtml(pokemon.name)} on Bulbapedia ${icon("external")}</a></p></div>`;

@@ -5,6 +5,11 @@ const asNumber = (value: string | undefined): number => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const displayName = (name: string): string =>
+  name.includes("(")
+    ? name.replace("(", " (").replaceAll(/([a-z])([A-Z])/g, "$1 $2")
+    : name;
+
 export const parsePokemonXml = (source: string): Pokemon[] => {
   const document = new DOMParser().parseFromString(source, "application/xml");
   const parserError = document.querySelector("parsererror");
@@ -16,14 +21,19 @@ export const parsePokemonXml = (source: string): Pokemon[] => {
   return [...document.querySelectorAll("pokemon")].flatMap((node) => {
     const name = node.querySelector("name")?.textContent?.trim();
     const fields = node.querySelector("evs")?.textContent?.trim().split("/");
-    if (!name || fields?.length !== 8) return [];
+    if (
+      !name ||
+      fields?.length !== 8 ||
+      fields.some((field) => !/^\d+$/.test(field))
+    )
+      return [];
 
     const values = fields.map(asNumber);
     const dex = fields[7];
     if (!dex) return [];
     return [
       {
-        name,
+        name: displayName(name),
         dex,
         exp: values[0] ?? 0,
         evs: Object.fromEntries(
@@ -38,7 +48,9 @@ export const loadPokemon = async (): Promise<Pokemon[]> => {
   const response = await fetch(`${import.meta.env.BASE_URL}pokemon.xml`);
   if (!response.ok)
     throw new Error(`Could not load Pokémon data (${response.status})`);
-  return parsePokemonXml(await response.text());
+  const pokemon = parsePokemonXml(await response.text());
+  if (pokemon.length === 0) throw new Error("Pokémon data is empty");
+  return pokemon;
 };
 
 export const primaryPokemon = (pokemon: readonly Pokemon[]): Pokemon[] =>

@@ -8,6 +8,8 @@ export const statKeys = [
 ] as const;
 export type StatKey = (typeof statKeys)[number];
 export type SortKey = "dex" | "name" | "exp" | StatKey;
+export const MAX_QUICK_REFERENCE = 100;
+export const MAX_TRAINEES = 50;
 
 export interface Pokemon {
   readonly name: string;

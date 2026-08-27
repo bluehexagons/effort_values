@@ -7,11 +7,18 @@ import {
   renderTracker,
 } from "./render.ts";
 import { matchesPokemon, sortPokemon } from "./search.ts";
-import { encodeState, loadState, STORAGE_KEY, saveState } from "./storage.ts";
+import {
+  clearStoredState,
+  encodeState,
+  loadState,
+  saveState,
+} from "./storage.ts";
 import {
   type AppState,
   defaultState,
   emptyEvs,
+  MAX_QUICK_REFERENCE,
+  MAX_TRAINEES,
   type Pokemon,
   type SortKey,
   statKeys,
@@ -70,7 +77,24 @@ const syncControls = (): void => {
     setInput(statToInput[stat], state.filters[stat]);
   });
   byId("evform").hidden = !state.filterEnabled;
+  updateFilterDisclosure(true);
   updateSortDirection();
+};
+
+const activeFilterCount = (): number =>
+  (["exp", ...statKeys] as const).filter(
+    (key) => state.filters[key].trim() !== "",
+  ).length;
+
+const updateFilterDisclosure = (revealActive = false): void => {
+  const options = byId("ev-options");
+  const button = byId<HTMLButtonElement>("toggle-filter-fields");
+  const count = activeFilterCount();
+  if (revealActive && count > 0) options.classList.add("filter-expanded");
+  const expanded = options.classList.contains("filter-expanded");
+  button.disabled = !state.filterEnabled;
+  button.textContent = `${expanded ? "Hide" : "Edit"} values${count > 0 ? ` (${count})` : ""}`;
+  button.setAttribute("aria-expanded", String(expanded));
 };
 
 const updateSortDirection = (): void => {
@@ -158,6 +182,10 @@ const addReference = (dex: string): void => {
     status(`${entry.name} is already in Quick Reference`);
     return;
   }
+  if (state.quickReference.length >= MAX_QUICK_REFERENCE) {
+    status(`Quick Reference is limited to ${MAX_QUICK_REFERENCE} Pokémon`);
+    return;
+  }
   state.quickReference.push(dex);
   updateAndRender();
   status(`${entry.name} added to Quick Reference`);
@@ -213,6 +241,10 @@ const handleAction = (button: HTMLElement): void => {
     updateAndRender();
   }
   if (action === "add-trainee") {
+    if (state.trainees.length >= MAX_TRAINEES) {
+      status(`The tracker is limited to ${MAX_TRAINEES} trainees`);
+      return;
+    }
     const added = newTrainee();
     state.trainees.push(added);
     state.selectedTraineeId = added.id;
@@ -262,13 +294,28 @@ const bindDelegatedEvents = (): void => {
     true,
   );
   document.addEventListener("click", (event) => {
-    const button = (event.target as Element).closest<HTMLElement>(
-      "[data-action]",
-    );
-    if (button) handleAction(button);
+    if (!(event.target instanceof Element)) return;
+    const button = event.target.closest<HTMLElement>("[data-action]");
+    if (button) {
+      handleAction(button);
+      return;
+    }
+    const card = event.target.closest<HTMLElement>("[data-trainee-id]");
+    if (
+      card?.dataset.traineeId &&
+      state.selectedTraineeId !== card.dataset.traineeId
+    ) {
+      state.selectedTraineeId = card.dataset.traineeId;
+      updateSelectionUi();
+      status(
+        `${traineeById(card.dataset.traineeId)?.name || "Trainee"} selected`,
+      );
+      persistSoon();
+    }
   });
   document.addEventListener("dragstart", (event) => {
-    const card = (event.target as Element).closest<HTMLElement>(
+    if (!(event.target instanceof Element)) return;
+    const card = event.target.closest<HTMLElement>(
       "[data-dex][draggable=true]",
     );
     if (card?.dataset.dex && event.dataTransfer)
@@ -305,7 +352,7 @@ const statToInput = {
 
 const bindControls = (): void => {
   byId<HTMLInputElement>("search").addEventListener("input", (event) => {
-    state.query = (event.currentTarget as HTMLInputElement).value;
+    state.query = (event.currentTarget as HTMLInputElement).value.slice(0, 80);
     updateAndRender();
   });
   byId<HTMLInputElement>("within-filter").addEventListener(
@@ -326,6 +373,7 @@ const bindControls = (): void => {
   byId<HTMLInputElement>("byev").addEventListener("change", (event) => {
     state.filterEnabled = (event.currentTarget as HTMLInputElement).checked;
     byId("evform").hidden = !state.filterEnabled;
+    updateFilterDisclosure();
     updateAndRender();
   });
   byId<HTMLSelectElement>("result-sort").addEventListener("change", (event) => {
@@ -346,11 +394,12 @@ const bindControls = (): void => {
   for (const [id, key] of filterInputs)
     byId<HTMLInputElement>(id).addEventListener("input", (event) => {
       const input = event.currentTarget as HTMLInputElement;
-      state.filters[key] = input.value;
+      state.filters[key] = input.value.slice(0, 8);
       input.setAttribute(
         "aria-invalid",
         /^(?:\*|\d+[+-]?)?$/.test(input.value.trim()) ? "false" : "true",
       );
+      updateFilterDisclosure();
       updateAndRender();
     });
   byId("clear-filters").addEventListener("click", () => {
@@ -360,11 +409,8 @@ const bindControls = (): void => {
   });
   byId("toggle-filter-fields").addEventListener("click", () => {
     const options = byId("ev-options");
-    const expanded = options.classList.toggle("filter-expanded");
-    byId("toggle-filter-fields").setAttribute(
-      "aria-expanded",
-      String(expanded),
-    );
+    options.classList.toggle("filter-expanded");
+    updateFilterDisclosure();
   });
   byId("share-state").addEventListener("click", async () => {
     const url = `${window.location.href.split("#")[0]}#state=${encodeState(state)}`;
@@ -383,7 +429,12 @@ const bindControls = (): void => {
       )
     )
       return;
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      clearStoredState();
+    } catch {
+      status("Saved data could not be cleared in this browser");
+      return;
+    }
     history.replaceState(null, "", window.location.href.split("#")[0]);
     state = defaultState();
     syncControls();
@@ -391,9 +442,8 @@ const bindControls = (): void => {
     status("Saved data cleared");
   });
   byId("evtracker").addEventListener("focusin", (event) => {
-    const card = (event.target as Element).closest<HTMLElement>(
-      "[data-trainee-id]",
-    );
+    if (!(event.target instanceof Element)) return;
+    const card = event.target.closest<HTMLElement>("[data-trainee-id]");
     if (
       card?.dataset.traineeId &&
       state.selectedTraineeId !== card.dataset.traineeId
@@ -404,7 +454,8 @@ const bindControls = (): void => {
     }
   });
   byId("evtracker").addEventListener("input", (event) => {
-    const input = event.target as HTMLInputElement;
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
     const id =
       input.closest<HTMLElement>("[data-trainee-id]")?.dataset.traineeId;
     const trainee = id ? traineeById(id) : undefined;
@@ -432,12 +483,29 @@ const bindControls = (): void => {
       byId("selected-trainee-summary").textContent =
         `Adding to: ${trainee.name || "Unnamed trainee"}`;
   });
+  byId("evtracker").addEventListener("change", (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.dataset.field === "name")
+      return;
+    const id =
+      input.closest<HTMLElement>("[data-trainee-id]")?.dataset.traineeId;
+    const trainee = id ? traineeById(id) : undefined;
+    const stat = input.dataset.field;
+    if (
+      trainee &&
+      stat &&
+      statKeys.includes(stat as (typeof statKeys)[number])
+    ) {
+      input.value = String(trainee.evs[stat as (typeof statKeys)[number]]);
+    }
+  });
   const dialog = byId<HTMLDialogElement>("details-dialog");
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) dialog.close();
   });
   document.addEventListener("keydown", (event) => {
-    const target = event.target as HTMLElement;
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
     const isTyping = target.matches(
       "input, textarea, select, [contenteditable=true]",
     );

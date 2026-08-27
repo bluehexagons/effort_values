@@ -30,7 +30,7 @@
 
       <section id="search-controls" class="control-card" aria-label="Search and filters">
         <div class="search-main">
-          <label class="search-field" for="search"><span>Find a Pokémon <kbd>/</kbd></span><input id="search" type="search" autocomplete="off" placeholder="Pikachu or Bulbasaur…" /></label>
+          <label class="search-field" for="search"><span>Find a Pokémon <kbd>/</kbd></span><input id="search" type="search" autocomplete="off" maxlength="80" placeholder="Pikachu or Bulbasaur…" /></label>
           <div class="search-count"><strong id="count">Loading…</strong><span>matching yields</span></div>
           <div class="filter-toggles">
             <label><input id="within-filter" type="checkbox" /> Match anywhere in name</label>
@@ -44,13 +44,13 @@
           </div>
           <div id="evform" class="ev-filter">
             <div class="ev-filter-grid">
-              <label><span>EXP</span><input id="exp" type="text" /></label>
-              <label><span>HP</span><input id="hp" type="text" /></label>
-              <label><span>Attack</span><input id="atk" type="text" /></label>
-              <label><span>Defense</span><input id="def" type="text" /></label>
-              <label><span>Sp. Atk</span><input id="sat" type="text" /></label>
-              <label><span>Sp. Def</span><input id="sdf" type="text" /></label>
-              <label><span>Speed</span><input id="spd" type="text" /></label>
+              <label><span>EXP</span><input id="exp" type="text" maxlength="8" /></label>
+              <label><span>HP</span><input id="hp" type="text" maxlength="8" /></label>
+              <label><span>Attack</span><input id="atk" type="text" maxlength="8" /></label>
+              <label><span>Defense</span><input id="def" type="text" maxlength="8" /></label>
+              <label><span>Sp. Atk</span><input id="sat" type="text" maxlength="8" /></label>
+              <label><span>Sp. Def</span><input id="sdf" type="text" maxlength="8" /></label>
+              <label><span>Speed</span><input id="spd" type="text" maxlength="8" /></label>
               <button id="clear-filters" type="button" class="quiet-button clear-filters">Clear yield filters</button>
             </div>
           </div>
@@ -81,7 +81,7 @@
           </section>
         </div>
       </div>
-      <dialog id="details-dialog"><div id="details-content"></div></dialog>
+      <dialog id="details-dialog" aria-labelledby="details-title"><div id="details-content"></div></dialog>
       <footer id="cc">Pokémon and related names are trademarks of their respective owners. Source code is available under the repository license.</footer>
     </main>
   </body>
