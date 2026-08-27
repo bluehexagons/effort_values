@@ -240,6 +240,8 @@ button,.button-link{min-height:42px;border:1px solid #aebdca;border-radius:8px;p
 button:hover,.button-link:hover{border-color:var(--accent);background:var(--accent-soft)}
 .primary-action{border-color:var(--accent)!important;background:var(--accent)!important;color:#fff!important}
 .primary-action:hover{background:var(--accent-dark)!important}
+button:disabled{cursor:not-allowed;opacity:.55}
+.primary-action:disabled{border-color:#8d9ba7!important;background:#8d9ba7!important;color:#fff!important}
 .quiet-button,.text-button{background:transparent;color:var(--muted)}
 .text-button{border:0;min-height:32px;padding:3px 6px;text-decoration:underline;text-underline-offset:3px}
 .icon-button{width:42px;padding:7px;flex:0 0 42px}
@@ -271,6 +273,7 @@ button:hover,.button-link:hover{border-color:var(--accent);background:var(--acce
 .ev-filter-grid{display:grid;grid-template-columns:repeat(7,minmax(68px,1fr)) auto;gap:8px;align-items:end}
 .ev-filter-grid label{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:.75rem;font-weight:700}
 #evform.ev-filter input{width:100%!important;min-height:40px;border:1px solid #b8c5cf;border-radius:7px;padding:6px 8px;text-align:center}
+#evform.ev-filter input[aria-invalid=true]{border-color:var(--danger);box-shadow:0 0 0 2px rgba(163,58,58,.12)}
 .clear-filters{white-space:nowrap}
 .filter-help{display:block;margin-top:7px;color:var(--muted);font-size:.78rem}
 .filter-help code,.ev-toggle code{padding:1px 4px;border-radius:4px;background:#edf2f5}
@@ -304,6 +307,7 @@ button:hover,.button-link:hover{border-color:var(--accent);background:var(--acce
 #workspace{grid-template-columns:minmax(230px,.8fr) minmax(350px,1.2fr);gap:12px;margin-top:0}
 #quickchart,#evtracker{overflow:hidden;border-radius:12px;padding:0!important;box-shadow:var(--shadow)}
 #workspace.floating{min-height:680px}
+#workspace.floating #quickchart,#workspace.floating #evtracker{max-height:calc(100vh - 180px);overflow:auto}
 #workspace.floating #quickchart{width:calc(40% - 8px)}
 #workspace.floating #evtracker{width:calc(60% - 8px)}
 .panel-title{min-height:50px;padding:10px 12px;background:#f8fafb}
@@ -361,7 +365,7 @@ button:hover,.button-link:hover{border-color:var(--accent);background:var(--acce
  #workspace{grid-template-columns:1fr}
  #evtracker{order:-1}
  #workspace.floating{display:grid;min-height:0}
- #workspace.floating #quickchart,#workspace.floating #evtracker{width:100%}
+ #workspace.floating #quickchart,#workspace.floating #evtracker{width:100%;max-height:none;overflow:hidden}
  .panel-title small{display:none}
  .result-list{max-height:none;overflow:visible}
  .results-heading{position:sticky;top:0;z-index:4;margin:0 -6px;padding:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px)}
@@ -509,6 +513,7 @@ function start() {
 	if (evsearch) $("evform").style.display="";
 	else $("evform").style.display="none";
 	updateFilterDisclosure();
+	validateYieldFilters();
 	hideWithin();
 	refreshQuick();
 	refreshTracker();
@@ -561,6 +566,7 @@ function stateObject() {
 		search:$("search").value,
 		evq:[$("exp").value,$("hp").value,$("atk").value,$("def").value,$("sat").value,$("sdf").value,$("spd").value],
 		settings:{within:within,always:always,evsearch:evsearch,addDelay:addDelay,loadall:loadall,movbuttons:movbuttons},
+		sort:{column:sortColumn,descending:sortDesc},
 		columns:{quick:qkcolumn,tracker:evcolumn},
 		panels:panelLayout
 	};
@@ -593,6 +599,10 @@ function applyState(state) {
 	if (typeof settings.addDelay == "boolean") addDelay=settings.addDelay;
 	if (typeof settings.loadall == "boolean") loadall=settings.loadall;
 	if (typeof settings.movbuttons == "boolean") movbuttons=settings.movbuttons;
+	var savedSort=state.sort || {};
+	sortColumn=clamp(stateNumber(savedSort.column,8),0,8);
+	sortDesc=savedSort.descending === true;
+	applyPokemonSort();
 	var columns=state.columns || {};
 	qkcolumn=clamp(stateNumber(columns.quick,0),0,20);
 	evcolumn=clamp(stateNumber(columns.tracker,0),0,20);
@@ -668,8 +678,13 @@ function resetState() {
 	var evids=["exp","hp","atk","def","sat","sdf","spd"];
 	for (var i=0;i<evids.length;i++) $(evids[i]).value="";
 	within=true;always=false;evsearch=true;addDelay=false;loadall=true;movbuttons=false;
+	filterFieldsExpanded=false;
+	sortColumn=8;sortDesc=false;applyPokemonSort();
 	panelLayout={floating:false,quick:{x:0,y:0},tracker:{x:0,y:0}};
 	$("showall").checked=always;$("byev").checked=evsearch;$("dse").checked=addDelay;$("within-filter").checked=within;$("loadall").checked=loadall;
+	$("evform").style.display="";
+	updateFilterDisclosure();
+	validateYieldFilters();
 	refreshQuick();refreshTracker();enter($("search"));setSaveStatus("Saved data cleared");
 }
 function compareColumn(a,b) {
@@ -681,19 +696,29 @@ function compareColumnQ(a,b) {
 function compareColumnT(a,b) {
 	return a.split("/")[sortColumnT] - b.split("/")[sortColumnT];
 }
+function applyPokemonSort() {
+	var column=sortColumn;
+	pokemon=trupokemon.slice().sort(function(a,b){
+		var left=a.split("/");
+		var right=b.split("/");
+		if (column==0) return left[0].localeCompare(right[0]);
+		return stateNumber(left[column],0)-stateNumber(right[column],0);
+	});
+	if (sortDesc) pokemon.reverse();
+	optimize=pokemon;
+	if ($("result-sort")) $("result-sort").value=String(sortColumn);
+}
 function sort(col) {
+	col=clamp(stateNumber(col,8),0,8);
 	if (col==sortColumn) sortDesc=!sortDesc;
 	else {
 		if (col==0 || col==8) {sortDesc=false;}
 		else sortDesc=true;
 	}
 	sortColumn=col;
-	if (sortColumn == 8) {pokemon=trupokemon;}
-	if (sortColumn == 0) {pokemon=trupokemon.sort();}
-	else {pokemon=trupokemon.sort(compareColumn);}
-	if (sortDesc) pokemon=pokemon.reverse();
-	optimize=pokemon;
+	applyPokemonSort();
 	enter($("search"));
+	scheduleSave();
 }
 function sortq(col) {
 	if (col==sortColumnQ) sortDescQ=!sortDescQ;
@@ -765,6 +790,7 @@ function getCookie(c_name) { //lifted from w3schools example
 	return "";
 }
 function evs(stf) {
+	validateYieldFilters();
 	enter($("search"));
 	updateFilterDisclosure();
 	scheduleSave();
@@ -784,7 +810,9 @@ function enter(stf) {
 	$("count").innerHTML="Loading...";
 	$("count2").innerHTML="Loading...";
 	var text=stf.value;
-	if (text.length < lastlen) {optimize=pokemon;}
+	/* Searching the complete sorted list avoids stale results when one query is
+	   replaced by a different query of the same length. */
+	optimize=pokemon;
 	var topt=new Array();
 	var pure="";
 	var stuff="";
@@ -851,6 +879,7 @@ function enter(stf) {
 	$("count").textContent=visibleExact+visibleWithin;
 	$("count2").textContent=visibleWithin;
 	lastlen=text.length;
+	updateYieldActionState();
 	updateBars();
 	//if ($("quickchart").style.top > document.body.offsetWidth) $("quickchart").style.top=document.body.offsetWidth-100;
 }
@@ -1152,14 +1181,14 @@ function selectInnerInput(id,tracker) {
 }
 function checkEVs(pokeraw) {
 	var sp=pokeraw.split("/");
-	var dexp=$("exp").value;
-	var dhp=$("hp").value;
-	var datk=$("atk").value;
-	var ddef=$("def").value;
-	var dsat=$("sat").value;
-	var dsdf=$("sdf").value;
-	var dspd=$("spd").value;
-	
+	var dexp=$("exp").value.trim();
+	var dhp=$("hp").value.trim();
+	var datk=$("atk").value.trim();
+	var ddef=$("def").value.trim();
+	var dsat=$("sat").value.trim();
+	var dsdf=$("sdf").value.trim();
+	var dspd=$("spd").value.trim();
+
 	if ((compareEV(sp[1],dexp)) && (compareEV(sp[2],dhp)) && (compareEV(sp[3],datk)) && (compareEV(sp[4],ddef)) && (compareEV(sp[5],dsat)) && (compareEV(sp[6],dsdf)) && (compareEV(sp[7],dspd))) return true;
 	return false;
 }
@@ -1210,7 +1239,7 @@ function resultCard(pokeraw,dim,ignoreFilter) {
 		"<div class='result-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+escapeHtml(parts[8])+" · "+escapeHtml(parts[1])+" EXP</small></div></div>"+
 		"<div class='result-actions'>"+
 		"<button type='button' onclick='addQuickByNumber(\""+number+"\")' title='Add to Quick Reference'>"+iconSvg("plus")+" Reference</button>"+
-		"<button type='button' class='primary-action' onclick='addYieldByNumber(\""+number+"\")' title='Add this battle yield to the selected trainee'>"+iconSvg("plus")+" Add "+total+" EV"+(total==1 ? "" : "s")+"</button>"+
+		"<button type='button' class='primary-action yield-action' onclick='addYieldByNumber(\""+number+"\")' title='Add this battle yield to the selected trainee'>"+iconSvg("plus")+" Add "+total+" EV"+(total==1 ? "" : "s")+"</button>"+
 		"<a class='button-link' href='"+bulbapediaUrl(parts[0])+"' target='_blank' rel='noopener noreferrer'>"+iconSvg("external")+" Bulbapedia</a>"+
 		"</div>"+
 		"<div class='ev-pills'>"+evPills(pokeraw)+"</div>"+
@@ -1545,6 +1574,16 @@ function activeYieldFilterCount() {
 	for (var i=0;i<ids.length;i++) if ($(ids[i]).value.trim() != "") count++;
 	return count;
 }
+function validateYieldFilters() {
+	var ids=["exp","hp","atk","def","sat","sdf","spd"];
+	var pattern=/^(?:\*|\d+[+-]?)?$/;
+	for (var i=0;i<ids.length;i++) {
+		var input=$(ids[i]);
+		var valid=pattern.test(input.value.trim());
+		input.setAttribute("aria-invalid",valid ? "false" : "true");
+		input.title=valid ? "" : "Use a number, number followed by + or -, *, or leave blank";
+	}
+}
 function updateFilterDisclosure() {
 	var options=$("ev-options");
 	var button=$("toggle-filter-fields");
@@ -1633,13 +1672,14 @@ function modernRefreshQuick() {
 	for (var i=0;i<quickchart.length;i++) html+=modernQuickCard(quickchart[i],i);
 	if (quickchart.length) html+="<div class='panel-footer'><button type='button' class='quiet-button' onclick='quickchart=[];refreshQuick()'>"+iconSvg("trash")+" Clear reference</button></div>";
 	$("quickchart").innerHTML=html;
+	updateYieldActionState();
 	applyPanelLayout();
 	scheduleSave();
 }
 function modernQuickCard(pokeraw,index) {
 	var parts=pokeraw.split("/");
 	var total=totalEVs(pokeraw);
-	return "<article class='quick-card' data-number='"+escapeAttribute(parts[8])+"' draggable='true' ondragstart='dragPokemon(event)'><div class='quick-meta'><div class='quick-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+parts[8]+" · "+parts[1]+" EXP</small></div></div><button type='button' class='icon-button' onclick='removeQuickIndex("+index+")' aria-label='Remove "+escapeAttribute(parts[0])+"'>"+iconSvg("trash")+"</button></div><div class='ev-pills'>"+evPills(pokeraw)+"</div><div class='quick-actions'><button type='button' class='primary-action' id='plus/"+index+"' onclick='evplus(this)' title='Add this battle yield to the selected trainee'>"+iconSvg("plus")+" Add "+total+" EV"+(total==1 ? "" : "s")+"</button><a class='text-link' href='"+bulbapediaUrl(parts[0])+"' target='_blank' rel='noopener noreferrer'>Bulbapedia "+iconSvg("external")+"</a></div></article>";
+	return "<article class='quick-card' data-number='"+escapeAttribute(parts[8])+"' draggable='true' ondragstart='dragPokemon(event)'><div class='quick-meta'><div class='quick-identity'>"+spriteMarkup(pokeraw)+"<div><strong>"+escapeHtml(parts[0])+"</strong><br /><small>#"+parts[8]+" · "+parts[1]+" EXP</small></div></div><button type='button' class='icon-button' onclick='removeQuickIndex("+index+")' aria-label='Remove "+escapeAttribute(parts[0])+"'>"+iconSvg("trash")+"</button></div><div class='ev-pills'>"+evPills(pokeraw)+"</div><div class='quick-actions'><button type='button' class='primary-action yield-action' id='plus/"+index+"' onclick='evplus(this)' title='Add this battle yield to the selected trainee'>"+iconSvg("plus")+" Add "+total+" EV"+(total==1 ? "" : "s")+"</button><a class='text-link' href='"+bulbapediaUrl(parts[0])+"' target='_blank' rel='noopener noreferrer'>Bulbapedia "+iconSvg("external")+"</a></div></article>";
 }
 function modernProcessTracker() {
 	var entries=[];
@@ -1676,10 +1716,13 @@ function modernRefreshTracker() {
 	scheduleSave();
 }
 function modernRemoveTracker(index) {
+	processTracker();
+	var name=evtracker[index] ? evtracker[index].split("/")[0] : "Trainee";
 	evtracker.splice(index,1);
 	if (index < evselect) evselect--;
 	else if (index == evselect) evselect=Math.min(index,evtracker.length-1);
 	refreshTracker();
+	setSaveStatus((name || "Trainee")+" removed");
 }
 function modernAddTracker() {
 	evtracker.push("/0/0/0/0/0/0");
@@ -1708,19 +1751,31 @@ function selectTrackerRow(index) {
 }
 function updateSelectedSummary() {
 	var summary=$("selected-trainee-summary");
-	if (!summary) return;
-	if (evselect >= 0 && evselect < evtracker.length) {
-		summary.textContent="Adding to: "+(evtracker[evselect].split("/")[0] || "Unnamed trainee");
-		summary.classList.add("has-selection");
-	} else {
-		summary.textContent="Select a trainee to add yields";
-		summary.classList.remove("has-selection");
+	if (summary) {
+		if (evselect >= 0 && evselect < evtracker.length) {
+			summary.textContent="Adding to: "+(evtracker[evselect].split("/")[0] || "Unnamed trainee");
+			summary.classList.add("has-selection");
+		} else {
+			summary.textContent="Select a trainee to add yields";
+			summary.classList.remove("has-selection");
+		}
+	}
+	updateYieldActionState();
+}
+function updateYieldActionState() {
+	var hasSelection=evselect >= 0 && evselect < evtracker.length;
+	var traineeName=hasSelection ? (evtracker[evselect].split("/")[0] || "unnamed trainee") : "";
+	var actions=document.querySelectorAll(".yield-action");
+	for (var i=0;i<actions.length;i++) {
+		actions[i].disabled=!hasSelection;
+		actions[i].title=hasSelection ? "Add this battle yield to "+traineeName : "Select a trainee before adding yields";
 	}
 }
 function resetTrackerRow(index) {
 	processTracker();
 	if (!evtracker[index]) return;
 	var name=evtracker[index].split("/")[0];
+	if (!window.confirm("Reset all EV totals for "+(name || "this trainee")+"?")) return;
 	evtracker[index]=name+"/0/0/0/0/0/0";
 	refreshTracker();
 	setSaveStatus((name || "Trainee")+" EVs reset");
@@ -1736,7 +1791,7 @@ function modernInfo(name) {
 function refreshQuick() { modernRefreshQuick(); }
 function refreshTracker() { modernRefreshTracker(); }
 function processTracker() { modernProcessTracker(); }
-function removeQuickIndex(index) { quickchart.splice(index,1); refreshQuick(); }
+function removeQuickIndex(index) { var name=quickchart[index] ? quickchart[index].split("/")[0] : "Reference Pokémon"; quickchart.splice(index,1); refreshQuick(); setSaveStatus(name+" removed from Quick Reference"); }
 function removeTrackerIndex(index) { modernRemoveTracker(index); }
 function removeTracker(id) { modernRemoveTracker(parseInt(id.id.split("/")[1],10)); }
 function addTracker() { modernAddTracker(); }
@@ -1773,13 +1828,13 @@ function genInfo(name) { return modernInfo(name); }
 <div class="ev-toggle-row"><label class="ev-toggle"><input id="byev" type="checkbox" onclick="sevs(this)" /> <span><strong>Filter by yield</strong><small>Use an exact number, <code>2+</code>, or <code>1-</code>.</small></span></label><button id="toggle-filter-fields" type="button" class="quiet-button filter-disclosure" aria-expanded="false" onclick="toggleFilterFields()">Edit values</button></div>
 <div id="evform" class="ev-filter">
 <div class="ev-filter-grid">
-<label><span>EXP</span><input id="exp" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
-<label><span>HP</span><input id="hp" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
-<label><span>Attack</span><input id="atk" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
-<label><span>Defense</span><input id="def" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
-<label><span>Sp. Atk</span><input id="sat" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
-<label><span>Sp. Def</span><input id="sdf" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
-<label><span>Speed</span><input id="spd" type="text" inputmode="numeric" oninput="evs(this)" value="" /></label>
+<label><span>EXP</span><input id="exp" type="text" oninput="evs(this)" value="" /></label>
+<label><span>HP</span><input id="hp" type="text" oninput="evs(this)" value="" /></label>
+<label><span>Attack</span><input id="atk" type="text" oninput="evs(this)" value="" /></label>
+<label><span>Defense</span><input id="def" type="text" oninput="evs(this)" value="" /></label>
+<label><span>Sp. Atk</span><input id="sat" type="text" oninput="evs(this)" value="" /></label>
+<label><span>Sp. Def</span><input id="sdf" type="text" oninput="evs(this)" value="" /></label>
+<label><span>Speed</span><input id="spd" type="text" oninput="evs(this)" value="" /></label>
 <button type="button" class="quiet-button clear-filters" onclick="clearEVs()">Clear yield filters</button>
 </div>
 <span id="evhelp" class="filter-help">Examples: <code>2+</code> means at least 2; <code>1-</code> means at most 1.</span>
@@ -1794,7 +1849,7 @@ function genInfo(name) { return modernInfo(name); }
 <div id="main-layout">
 <section id="results" aria-label="Search results">
 <div class="results-heading">
-<div><p class="eyebrow">Battle sources</p><h2>Yield results</h2><span id="selected-trainee-summary" class="selected-summary">Select a trainee to add yields</span></div>
+<div><p class="eyebrow">Battle sources</p><h2>Yield results</h2><span id="selected-trainee-summary" class="selected-summary" role="status" aria-live="polite">Select a trainee to add yields</span></div>
 <div class="sort-controls" aria-label="Sort results"><label for="result-sort">Sort by</label><select id="result-sort" onchange="sort(parseInt(this.value,10))"><option value="8">Pokédex #</option><option value="0">Name</option><option value="1">EXP</option><option value="2">HP</option><option value="3">Attack</option><option value="4">Defense</option><option value="5">Sp. Atk</option><option value="6">Sp. Def</option><option value="7">Speed</option></select><button type="button" class="icon-button" onclick="sort(sortColumn)" title="Reverse sort" aria-label="Reverse sort">↕</button></div>
 </div>
 <div id="exact">
