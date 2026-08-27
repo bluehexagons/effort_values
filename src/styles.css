@@ -1331,3 +1331,231 @@ button:disabled {
 .detail-form {
   border-top: 1px solid var(--line);
 }
+
+/* UI polish: clearer hierarchy, crisper sprites, and consistent interaction states. */
+:root {
+  --focus: #65b6eb;
+  --panel-hover: #f7fbfd;
+  --surface-subtle: #f8fafc;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 12% -10%,
+      rgba(108, 183, 225, 0.13),
+      transparent 30rem
+    ),
+    #f4f7f9;
+}
+
+button,
+.button-link,
+input,
+select,
+summary {
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+button:active:not(:disabled),
+.button-link:active {
+  transform: translateY(1px);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 70%, transparent);
+  outline-offset: 2px;
+}
+
+.search-field > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+kbd {
+  min-width: 24px;
+  border: 1px solid #c7d2dc;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 6px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font:
+    600 0.72rem / 1.4 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
+  text-align: center;
+}
+
+.search-field input:hover,
+#evform.ev-filter input:hover,
+.tracker-field input:hover,
+.tracker-head .trainee-name:hover,
+.sort-controls select:hover {
+  border-color: #86a7bf;
+}
+
+.search-count {
+  align-self: end;
+  min-width: 122px;
+  border: 1px solid #dce5eb;
+  border-radius: 9px;
+  padding: 5px 10px;
+  background: var(--surface-subtle);
+}
+
+.sort-direction {
+  color: var(--accent-dark);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.result-card {
+  position: relative;
+  margin: 2px 0;
+  border-bottom-color: transparent;
+  border-radius: 9px;
+  padding: 12px 8px;
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease;
+}
+
+.result-card::after {
+  position: absolute;
+  right: 8px;
+  bottom: -2px;
+  left: 8px;
+  height: 1px;
+  background: var(--line);
+  content: "";
+}
+
+.result-card:last-child::after {
+  display: none;
+}
+
+.result-card:hover {
+  background: var(--panel-hover);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.result-card.dim:hover {
+  opacity: 0.72;
+}
+
+.result-identity,
+.quick-identity {
+  gap: 11px;
+}
+
+.sprite-wrap {
+  width: 46px;
+  height: 46px;
+  flex-basis: 46px;
+  overflow: hidden;
+  border: 1px solid #dce6ed;
+  background: radial-gradient(circle at 50% 38%, #fff 0 24%, #edf3f6 72%);
+  box-shadow: inset 0 -2px 5px rgba(23, 50, 77, 0.05);
+}
+
+.sprite-wrap img {
+  width: 32px;
+  height: 32px;
+  transform: translateY(-2px);
+  image-rendering: pixelated;
+}
+
+#quickchart,
+#evtracker,
+#results,
+.control-card {
+  border-color: #cbd7e0 !important;
+}
+
+.panel-title {
+  background: linear-gradient(180deg, #fbfcfd, #f5f8fa);
+}
+
+.quick-card {
+  transition: background-color 120ms ease;
+}
+
+.quick-card:hover {
+  background: var(--panel-hover);
+}
+
+.tracker-entry.selected {
+  background: linear-gradient(90deg, #edf8ff, #f8fcff 64%);
+}
+
+.tracker-field input:focus,
+.tracker-head .trainee-name:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(23, 105, 170, 0.12);
+}
+
+.selected-summary {
+  border: 1px solid transparent;
+}
+
+.selected-summary.has-selection {
+  border-color: #c8e2f3;
+}
+
+#save-status {
+  min-height: 1.2em;
+}
+
+#cc {
+  color: var(--muted);
+  text-align: center;
+}
+
+#details-dialog .info-card > p,
+#details-dialog .info-card > h3 {
+  margin-right: 16px;
+  margin-left: 16px;
+}
+
+@media (max-width: 760px) {
+  kbd {
+    display: none;
+  }
+
+  .search-count {
+    min-width: 0;
+  }
+
+  .result-card {
+    padding: 14px 8px;
+  }
+
+  .result-card:hover {
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

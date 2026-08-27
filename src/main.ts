@@ -46,7 +46,6 @@ const persistSoon = (): void => {
   saveTimer = window.setTimeout(() => {
     try {
       saveState(state);
-      status("Saved on this device");
     } catch {
       status("Local saving is unavailable");
     }
@@ -71,6 +70,19 @@ const syncControls = (): void => {
     setInput(statToInput[stat], state.filters[stat]);
   });
   byId("evform").hidden = !state.filterEnabled;
+  updateSortDirection();
+};
+
+const updateSortDirection = (): void => {
+  const button = byId<HTMLButtonElement>("reverse-sort");
+  const direction = state.sortDescending ? "descending" : "ascending";
+  const nextDirection = state.sortDescending ? "ascending" : "descending";
+  button.textContent = state.sortDescending ? "↓" : "↑";
+  button.title = `Currently ${direction}; change to ${nextDirection}`;
+  button.setAttribute(
+    "aria-label",
+    `Currently sorted ${direction}; change to ${nextDirection}`,
+  );
 };
 
 const render = (): void => {
@@ -110,7 +122,33 @@ const render = (): void => {
 
 const updateAndRender = (): void => {
   render();
+  updateSortDirection();
   persistSoon();
+};
+
+const updateSelectionUi = (): void => {
+  const selected = selectedTrainee();
+  for (const card of byId("evtracker").querySelectorAll<HTMLElement>(
+    "[data-trainee-id]",
+  )) {
+    const isSelected = card.dataset.traineeId === state.selectedTraineeId;
+    card.classList.toggle("selected", isSelected);
+    const button = card.querySelector<HTMLButtonElement>(".select-trainee");
+    if (button) {
+      button.setAttribute("aria-pressed", String(isSelected));
+      button.textContent = isSelected ? "✓ Selected trainee" : "Select trainee";
+    }
+  }
+  for (const action of document.querySelectorAll<HTMLButtonElement>(
+    ".yield-action",
+  )) {
+    action.disabled = !selected;
+  }
+  const summary = byId("selected-trainee-summary");
+  summary.textContent = selected
+    ? `Adding to: ${selected.name || "Unnamed trainee"}`
+    : "Select a trainee to add yields";
+  summary.classList.toggle("has-selection", Boolean(selected));
 };
 
 const addReference = (dex: string): void => {
@@ -207,6 +245,22 @@ const handleAction = (button: HTMLElement): void => {
 };
 
 const bindDelegatedEvents = (): void => {
+  document.addEventListener(
+    "error",
+    (event) => {
+      const image = event.target;
+      if (
+        !(image instanceof HTMLImageElement) ||
+        !image.matches(".sprite-wrap img")
+      )
+        return;
+      image.hidden = true;
+      const fallback = image.nextElementSibling;
+      if (fallback instanceof HTMLElement)
+        fallback.style.display = "inline-flex";
+    },
+    true,
+  );
   document.addEventListener("click", (event) => {
     const button = (event.target as Element).closest<HTMLElement>(
       "[data-action]",
@@ -345,7 +399,7 @@ const bindControls = (): void => {
       state.selectedTraineeId !== card.dataset.traineeId
     ) {
       state.selectedTraineeId = card.dataset.traineeId;
-      render();
+      updateSelectionUi();
       persistSoon();
     }
   });
@@ -381,6 +435,22 @@ const bindControls = (): void => {
   const dialog = byId<HTMLDialogElement>("details-dialog");
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) dialog.close();
+  });
+  document.addEventListener("keydown", (event) => {
+    const target = event.target as HTMLElement;
+    const isTyping = target.matches(
+      "input, textarea, select, [contenteditable=true]",
+    );
+    if (
+      event.key === "/" &&
+      !isTyping &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey
+    ) {
+      event.preventDefault();
+      byId<HTMLInputElement>("search").focus();
+    }
   });
 };
 

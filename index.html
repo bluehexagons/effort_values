@@ -30,7 +30,7 @@
 
       <section id="search-controls" class="control-card" aria-label="Search and filters">
         <div class="search-main">
-          <label class="search-field" for="search"><span>Find a Pokémon</span><input id="search" type="search" autocomplete="off" placeholder="Pikachu or Bulbasaur…" /></label>
+          <label class="search-field" for="search"><span>Find a Pokémon <kbd>/</kbd></span><input id="search" type="search" autocomplete="off" placeholder="Pikachu or Bulbasaur…" /></label>
           <div class="search-count"><strong id="count">Loading…</strong><span>matching yields</span></div>
           <div class="filter-toggles">
             <label><input id="within-filter" type="checkbox" /> Match anywhere in name</label>
@@ -68,7 +68,7 @@
             <div class="sort-controls">
               <label for="result-sort">Sort by</label>
               <select id="result-sort"><option value="dex">Pokédex #</option><option value="name">Name</option><option value="exp">EXP</option><option value="hp">HP</option><option value="attack">Attack</option><option value="defense">Defense</option><option value="specialAttack">Sp. Atk</option><option value="specialDefense">Sp. Def</option><option value="speed">Speed</option></select>
-              <button id="reverse-sort" type="button" class="icon-button" title="Reverse sort" aria-label="Reverse sort">↕</button>
+              <button id="reverse-sort" type="button" class="icon-button sort-direction" title="Sort ascending" aria-label="Sort ascending">↑</button>
             </div>
           </div>
           <div id="result-list" class="result-list"></div>

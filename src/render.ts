@@ -36,7 +36,7 @@ const bulbapediaUrl = (name: string): string =>
   `https://bulbapedia.bulbagarden.net/wiki/${encodeURIComponent(name)}_(Pok%C3%A9mon)`;
 
 const sprite = (pokemon: Pokemon): string =>
-  `<span class="sprite-wrap"><img src="${spriteUrl(pokemon)}" alt="" width="40" height="40" loading="lazy" decoding="async" /><span class="sprite-fallback" aria-hidden="true">◈</span></span>`;
+  `<span class="sprite-wrap"><img src="${spriteUrl(pokemon)}" alt="" width="32" height="32" loading="lazy" decoding="async" /><span class="sprite-fallback" aria-hidden="true">◈</span></span>`;
 
 const pills = (pokemon: Pokemon): string => {
   const values = statKeys.flatMap((stat) =>
