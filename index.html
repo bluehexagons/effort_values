@@ -19,70 +19,179 @@
         <div>
           <p class="eyebrow">Pokémon training utility</p>
           <h1>EV Yield Planner</h1>
-          <p class="intro">Find battle yields, keep a quick reference, and apply EVs to the Pokémon you are training.</p>
+          <p class="intro">
+            Find battle yields, keep a quick reference, and apply EVs to the
+            Pokémon you are training.
+          </p>
         </div>
         <div class="header-actions">
           <button id="share-state" type="button">Share setup</button>
-          <button id="reset-state" type="button" class="quiet-button">Reset data</button>
-          <span id="save-status" role="status" aria-live="polite">Loading data…</span>
+          <button id="reset-state" type="button" class="quiet-button">
+            Reset data
+          </button>
+          <span id="save-status" role="status" aria-live="polite"
+            >Loading data…</span
+          >
         </div>
       </header>
 
-      <section id="search-controls" class="control-card" aria-label="Search and filters">
+      <section
+        id="search-controls"
+        class="control-card"
+        aria-label="Search and filters"
+      >
         <div class="search-main">
-          <label class="search-field" for="search"><span>Find a Pokémon <kbd>/</kbd></span><input id="search" type="search" autocomplete="off" maxlength="80" placeholder="Pikachu or Bulbasaur…" /></label>
-          <div class="search-count"><strong id="count">Loading…</strong><span>matching yields</span></div>
+          <label class="search-field" for="search"
+            ><span>Find a Pokémon <kbd>/</kbd></span
+            ><input
+              id="search"
+              type="search"
+              autocomplete="off"
+              maxlength="80"
+              placeholder="Pikachu or Bulbasaur…"
+          /></label>
+          <div class="search-count">
+            <strong id="count">Loading…</strong><span>matching yields</span>
+          </div>
           <div class="filter-toggles">
-            <label><input id="within-filter" type="checkbox" /> Match anywhere in name</label>
-            <label><input id="showall" type="checkbox" /> Dim non-matches</label>
+            <label
+              ><input id="within-filter" type="checkbox" /> Match anywhere in
+              name</label
+            >
+            <label
+              ><input id="showall" type="checkbox" /> Dim non-matches</label
+            >
           </div>
         </div>
         <div id="ev-options">
           <div class="ev-toggle-row">
-            <label class="ev-toggle"><input id="byev" type="checkbox" /> <span><strong>Filter by yield</strong><small>Use an exact number, <code>2+</code>, or <code>1-</code>.</small></span></label>
-            <button id="toggle-filter-fields" type="button" class="quiet-button filter-disclosure" aria-expanded="false">Edit values</button>
+            <label class="ev-toggle"
+              ><input id="byev" type="checkbox" />
+              <span
+                ><strong>Filter by yield</strong
+                ><small
+                  >Use an exact number, <code>2+</code>, or
+                  <code>1-</code>.</small
+                ></span
+              ></label
+            >
+            <button
+              id="toggle-filter-fields"
+              type="button"
+              class="quiet-button filter-disclosure"
+              aria-expanded="false"
+            >
+              Edit values
+            </button>
           </div>
           <div id="evform" class="ev-filter">
             <div class="ev-filter-grid">
-              <label><span>EXP</span><input id="exp" type="text" maxlength="8" /></label>
-              <label><span>HP</span><input id="hp" type="text" maxlength="8" /></label>
-              <label><span>Attack</span><input id="atk" type="text" maxlength="8" /></label>
-              <label><span>Defense</span><input id="def" type="text" maxlength="8" /></label>
-              <label><span>Sp. Atk</span><input id="sat" type="text" maxlength="8" /></label>
-              <label><span>Sp. Def</span><input id="sdf" type="text" maxlength="8" /></label>
-              <label><span>Speed</span><input id="spd" type="text" maxlength="8" /></label>
-              <button id="clear-filters" type="button" class="quiet-button clear-filters">Clear yield filters</button>
+              <label
+                ><span>EXP</span><input id="exp" type="text" maxlength="8"
+              /></label>
+              <label
+                ><span>HP</span><input id="hp" type="text" maxlength="8"
+              /></label>
+              <label
+                ><span>Attack</span><input id="atk" type="text" maxlength="8"
+              /></label>
+              <label
+                ><span>Defense</span><input id="def" type="text" maxlength="8"
+              /></label>
+              <label
+                ><span>Sp. Atk</span><input id="sat" type="text" maxlength="8"
+              /></label>
+              <label
+                ><span>Sp. Def</span><input id="sdf" type="text" maxlength="8"
+              /></label>
+              <label
+                ><span>Speed</span><input id="spd" type="text" maxlength="8"
+              /></label>
+              <button
+                id="clear-filters"
+                type="button"
+                class="quiet-button clear-filters"
+              >
+                Clear yield filters
+              </button>
             </div>
           </div>
         </div>
         <details id="settings" class="advanced-settings">
           <summary>More search options</summary>
-          <div><label><input id="loadall" type="checkbox" /> Show all when search is empty</label></div>
+          <div>
+            <label
+              ><input id="loadall" type="checkbox" /> Show all when search is
+              empty</label
+            >
+          </div>
         </details>
       </section>
 
       <div id="main-layout">
         <section id="results" aria-label="Search results">
           <div class="results-heading">
-            <div><p class="eyebrow">Battle sources</p><h2>Yield results</h2><span id="selected-trainee-summary" class="selected-summary" role="status" aria-live="polite">Select a trainee to add yields</span></div>
+            <div>
+              <p class="eyebrow">Battle sources</p>
+              <h2>Yield results</h2>
+              <span
+                id="selected-trainee-summary"
+                class="selected-summary"
+                role="status"
+                aria-live="polite"
+                >Select a trainee to add yields</span
+              >
+            </div>
             <div class="sort-controls">
               <label for="result-sort">Sort by</label>
-              <select id="result-sort"><option value="dex">Pokédex #</option><option value="name">Name</option><option value="exp">EXP</option><option value="hp">HP</option><option value="attack">Attack</option><option value="defense">Defense</option><option value="specialAttack">Sp. Atk</option><option value="specialDefense">Sp. Def</option><option value="speed">Speed</option></select>
-              <button id="reverse-sort" type="button" class="icon-button sort-direction" title="Sort ascending" aria-label="Sort ascending">↑</button>
+              <select id="result-sort">
+                <option value="dex">Pokédex #</option>
+                <option value="name">Name</option>
+                <option value="exp">EXP</option>
+                <option value="hp">HP</option>
+                <option value="attack">Attack</option>
+                <option value="defense">Defense</option>
+                <option value="specialAttack">Sp. Atk</option>
+                <option value="specialDefense">Sp. Def</option>
+                <option value="speed">Speed</option>
+              </select>
+              <button
+                id="reverse-sort"
+                type="button"
+                class="icon-button sort-direction"
+                title="Sort ascending"
+                aria-label="Sort ascending"
+              >
+                ↑
+              </button>
             </div>
           </div>
           <div id="result-list" class="result-list"></div>
         </section>
         <div id="workspace-column">
-          <div class="workspace-heading"><div><p class="eyebrow">Your session</p><h2>Training workspace</h2><p>Choose a trainee, then add yields from results or the reference list.</p></div></div>
+          <div class="workspace-heading">
+            <div>
+              <p class="eyebrow">Your session</p>
+              <h2>Training workspace</h2>
+              <p>
+                Choose a trainee, then add yields from results or the reference
+                list.
+              </p>
+            </div>
+          </div>
           <section id="workspace" aria-label="Saved lists">
             <div id="quickchart"></div>
             <div id="evtracker"></div>
           </section>
         </div>
       </div>
-      <dialog id="details-dialog" aria-labelledby="details-title"><div id="details-content"></div></dialog>
-      <footer id="cc">Pokémon and related names are trademarks of their respective owners. Source code is available under the repository license.</footer>
+      <dialog id="details-dialog" aria-labelledby="details-title">
+        <div id="details-content"></div>
+      </dialog>
+      <footer id="cc">
+        Pokémon and related names are trademarks of their respective owners.
+        Source code is available under the repository license.
+      </footer>
     </main>
   </body>
 </html>

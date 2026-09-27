@@ -44,7 +44,7 @@ export const sortPokemon = (
   state: AppState,
 ): Pokemon[] => {
   const direction = state.sortDescending ? -1 : 1;
-  return [...pokemon].sort((left, right) => {
+  return pokemon.toSorted((left, right) => {
     const comparison =
       state.sortKey === "name"
         ? left.name.localeCompare(right.name)

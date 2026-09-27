@@ -67,7 +67,7 @@ describe("saved-state validation", () => {
   });
 
   it("clears current and legacy browser storage", () => {
-    const removeItem = vi.fn();
+    const removeItem = vi.fn<() => void>();
     vi.stubGlobal("localStorage", { removeItem });
     clearStoredState();
     expect(removeItem).toHaveBeenCalledTimes(2);

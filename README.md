@@ -4,7 +4,7 @@ A static Pokémon effort-value yield search and training tracker. It supports re
 
 ## Development
 
-The project uses TypeScript 7's native compiler, Vite, Vitest, and Biome. Node.js 22 or newer is recommended.
+The project uses TypeScript 7's native compiler, Vite, Vitest, Oxlint, and Oxfmt. Node.js 22 or newer is recommended.
 
 ```sh
 npm install
@@ -16,7 +16,7 @@ Useful commands:
 - `npm run build` — type-check with TypeScript 7 and create the production bundle
 - `npm test` — run the unit test suite once
 - `npm run check` — lint, format-check, and type-check the project
-- `npm run check:fix` — apply safe formatting and lint fixes
+- `npm run check:fix` — apply safe lint fixes and format the project
 - `npm run preview` — serve the production build locally
 
 ## Structure

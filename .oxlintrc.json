@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "plugins": ["oxc", "typescript", "unicorn", "import", "vitest"],
+  "options": {
+    "maxWarnings": 0
+  },
+  "overrides": [
+    {
+      "files": ["src/main.ts"],
+      "rules": {
+        "import/no-unassigned-import": "off"
+      }
+    }
+  ]
+}
