@@ -1,6 +1,6 @@
 // oxlint-disable-next-line import/no-unassigned-import -- Vite bundles this stylesheet for its side effect.
 import "./styles.css";
-import { loadPokemon, primaryPokemon } from "./data.ts";
+import { loadPokemon } from "./data.ts";
 import {
   renderDetails,
   renderQuickReference,
@@ -12,6 +12,7 @@ import {
   clearStoredState,
   encodeState,
   loadState,
+  loadGenerationState,
   saveState,
 } from "./storage.ts";
 import {
@@ -23,6 +24,10 @@ import {
   type Pokemon,
   type SortKey,
   statKeys,
+  statCap,
+  statLabels,
+  statsForGeneration,
+  type Generation,
   type Trainee,
   type YieldFilters,
 } from "./types.ts";
@@ -35,11 +40,11 @@ const byId = <T extends HTMLElement>(id: string): T => {
 
 let state: AppState = defaultState();
 let pokemon: Pokemon[] = [];
-let primary: Pokemon[] = [];
+
 let saveTimer: number | undefined;
 
-const pokemonByDex = (dex: string): Pokemon | undefined =>
-  primary.find((entry) => entry.dex === dex);
+const pokemonById = (id: string): Pokemon | undefined =>
+  pokemon.find((entry) => entry.id === id);
 const traineeById = (id: string): Trainee | undefined =>
   state.trainees.find((entry) => entry.id === id);
 const selectedTrainee = (): Trainee | undefined =>
@@ -72,18 +77,15 @@ const syncControls = (): void => {
   setInput("showall", state.showNonMatches);
   setInput("byev", state.filterEnabled);
   setInput("loadall", state.showAllWhenEmpty);
-  setInput("result-sort", state.sortKey);
-  setInput("exp", state.filters.exp);
-  statKeys.forEach((stat) => {
-    setInput(statToInput[stat], state.filters[stat]);
-  });
+  setInput("generation", String(state.generation));
+  renderGenerationControls();
   byId("evform").hidden = !state.filterEnabled;
   updateFilterDisclosure(true);
   updateSortDirection();
 };
 
 const activeFilterCount = (): number =>
-  (["exp", ...statKeys] as const).filter(
+  statsForGeneration(state.generation).filter(
     (key) => state.filters[key].trim() !== "",
   ).length;
 
@@ -113,7 +115,7 @@ const updateSortDirection = (): void => {
 };
 
 const render = (): void => {
-  const sorted = sortPokemon(primary, state);
+  const sorted = sortPokemon(pokemon, state);
   const matching = sorted.filter((entry) => matchesPokemon(entry, state));
   const visible = state.showNonMatches ? sorted : matching;
   const noResultsMessage =
@@ -129,23 +131,26 @@ const render = (): void => {
         .map((entry) =>
           renderResult(
             entry,
+            state.generation,
             !matchesPokemon(entry, state),
             Boolean(selectedTrainee()),
-            state.quickReference.includes(entry.dex),
+            state.quickReference.includes(entry.id),
           ),
         )
         .join("")
     : noResultsMessage;
   const references = state.quickReference.flatMap(
-    (dex) => pokemonByDex(dex) ?? [],
+    (id) => pokemonById(id) ?? [],
   );
   byId("quickchart").innerHTML = renderQuickReference(
     references,
+    state.generation,
     Boolean(selectedTrainee()),
   );
   byId("evtracker").innerHTML = renderTracker(
     state.trainees,
     state.selectedTraineeId,
+    state.generation,
   );
   const selected = selectedTrainee();
   const summary = byId("selected-trainee-summary");
@@ -186,10 +191,10 @@ const updateSelectionUi = (): void => {
   summary.classList.toggle("has-selection", Boolean(selected));
 };
 
-const addReference = (dex: string): void => {
-  const entry = pokemonByDex(dex);
+const addReference = (id: string): void => {
+  const entry = pokemonById(id);
   if (!entry) return;
-  if (state.quickReference.includes(dex)) {
+  if (state.quickReference.includes(id)) {
     status(`${entry.name} is already saved`);
     return;
   }
@@ -197,23 +202,47 @@ const addReference = (dex: string): void => {
     status(`The saved list is limited to ${MAX_QUICK_REFERENCE} Pokémon`);
     return;
   }
-  state.quickReference.push(dex);
+  state.quickReference.push(id);
   updateAndRender();
   status(`${entry.name} saved for later`);
 };
 
-const addYield = (dex: string, traineeId?: string): void => {
-  const entry = pokemonByDex(dex);
+const addYield = (id: string, traineeId?: string): void => {
+  const entry = pokemonById(id);
   const trainee = traineeId ? traineeById(traineeId) : selectedTrainee();
   if (!entry || !trainee) {
     status("Select a trainee before adding a battle yield");
     return;
   }
   if (traineeId) state.selectedTraineeId = trainee.id;
-  for (const stat of statKeys)
-    trainee.evs[stat] = Math.min(9999, trainee.evs[stat] + entry.evs[stat]);
+  let remaining =
+    state.generation <= 2
+      ? Infinity
+      : Math.max(
+          0,
+          510 -
+            statsForGeneration(state.generation).reduce(
+              (sum, stat) => sum + trainee.evs[stat],
+              0,
+            ),
+        );
+  let gained = 0;
+  for (const stat of statsForGeneration(state.generation)) {
+    const gain = Math.min(
+      entry.evs[stat],
+      statCap(state.generation) - trainee.evs[stat],
+      remaining,
+    );
+    trainee.evs[stat] += gain;
+    gained += gain;
+    remaining -= gain;
+  }
   updateAndRender();
-  status(`${entry.name}'s yield added to ${trainee.name || "unnamed trainee"}`);
+  status(
+    gained > 0
+      ? `${entry.name}'s yield added to ${trainee.name || "unnamed trainee"}`
+      : `${trainee.name || "Trainee"} has reached the applicable training cap`,
+  );
 };
 
 const newTrainee = (): Trainee => ({
@@ -222,30 +251,25 @@ const newTrainee = (): Trainee => ({
   evs: emptyEvs(),
 });
 
-const showDetails = (dex: string): void => {
-  const entry = pokemonByDex(dex);
+const showDetails = (id: string): void => {
+  const entry = pokemonById(id);
   if (!entry) return;
-  const forms = pokemon.filter(
-    (candidate) => candidate.dex === dex && candidate.name.includes("("),
-  );
-  byId("details-content").innerHTML = renderDetails(entry, forms);
+  byId("details-content").innerHTML = renderDetails(entry, state.generation);
   byId<HTMLDialogElement>("details-dialog").showModal();
 };
 
 const handleAction = (button: HTMLElement): void => {
   const action = button.dataset.action;
-  const dex = button.dataset.dex;
+  const id = button.dataset.id;
   const card = button.closest<HTMLElement>("[data-trainee-id]");
   const trainee = card?.dataset.traineeId
     ? traineeById(card.dataset.traineeId)
     : undefined;
-  if (action === "reference" && dex) addReference(dex);
-  if (action === "yield" && dex) addYield(dex);
-  if (action === "details" && dex) showDetails(dex);
-  if (action === "remove-reference" && dex) {
-    state.quickReference = state.quickReference.filter(
-      (entry) => entry !== dex,
-    );
+  if (action === "reference" && id) addReference(id);
+  if (action === "yield" && id) addYield(id);
+  if (action === "details" && id) showDetails(id);
+  if (action === "remove-reference" && id) {
+    state.quickReference = state.quickReference.filter((entry) => entry !== id);
     updateAndRender();
   }
   if (action === "clear-reference") {
@@ -271,7 +295,9 @@ const handleAction = (button: HTMLElement): void => {
     status(`${trainee.name || "Trainee"} selected`);
   }
   if (action === "remove-trainee" && trainee) {
-    state.trainees = state.trainees.filter(({ id }) => id !== trainee.id);
+    state.trainees = state.trainees.filter(
+      ({ id: traineeId }) => traineeId !== trainee.id,
+    );
     if (state.selectedTraineeId === trainee.id)
       state.selectedTraineeId = state.trainees[0]?.id ?? null;
     updateAndRender();
@@ -279,7 +305,9 @@ const handleAction = (button: HTMLElement): void => {
   if (
     action === "reset-trainee" &&
     trainee &&
-    window.confirm(`Reset all EV totals for ${trainee.name || "this trainee"}?`)
+    window.confirm(
+      `Reset all ${state.generation <= 2 ? "stat experience" : "EV"} totals for ${trainee.name || "this trainee"}?`,
+    )
   ) {
     trainee.evs = emptyEvs();
     updateAndRender();
@@ -327,11 +355,9 @@ const bindDelegatedEvents = (): void => {
   });
   document.addEventListener("dragstart", (event) => {
     if (!(event.target instanceof Element)) return;
-    const card = event.target.closest<HTMLElement>(
-      "[data-dex][draggable=true]",
-    );
-    if (card?.dataset.dex && event.dataTransfer)
-      event.dataTransfer.setData("text/plain", card.dataset.dex);
+    const card = event.target.closest<HTMLElement>("[data-id][draggable=true]");
+    if (card?.dataset.id && event.dataTransfer)
+      event.dataTransfer.setData("text/plain", card.dataset.id);
   });
   for (const id of ["quickchart", "evtracker"] as const) {
     const target = byId(id);
@@ -345,28 +371,51 @@ const bindDelegatedEvents = (): void => {
     target.addEventListener("drop", (event) => {
       event.preventDefault();
       target.classList.remove("drop-target");
-      const dex = event.dataTransfer?.getData("text/plain") ?? "";
+      const pokemonId = event.dataTransfer?.getData("text/plain") ?? "";
       if (id === "quickchart") {
-        addReference(dex);
+        addReference(pokemonId);
       } else {
         const card =
           event.target instanceof Element
             ? event.target.closest<HTMLElement>("[data-trainee-id]")
             : null;
-        addYield(dex, card?.dataset.traineeId);
+        addYield(pokemonId, card?.dataset.traineeId);
       }
     });
   }
 };
 
-const statToInput = {
-  hp: "hp",
-  attack: "atk",
-  defense: "def",
-  specialAttack: "sat",
-  specialDefense: "sdf",
-  speed: "spd",
-} as const;
+const renderGenerationControls = (): void => {
+  const stats = statsForGeneration(state.generation);
+  byId("filter-grid").innerHTML =
+    stats
+      .map(
+        (stat) =>
+          `<label><span>${statLabels[stat]}</span><input data-filter="${stat}" type="text" maxlength="8" value="${state.filters[stat]}" /></label>`,
+      )
+      .join("") +
+    '<button id="clear-filters" type="button" class="quiet-button clear-filters">Clear yield filters</button>';
+  byId("result-sort").innerHTML =
+    '<option value="dex">Pokédex #</option><option value="name">Name</option>' +
+    stats
+      .map((stat) => `<option value="${stat}">${statLabels[stat]}</option>`)
+      .join("");
+  setInput("result-sort", state.sortKey);
+  const notes: Record<Generation, string> = {
+    1: "Red/Blue/Yellow: defeated Pokémon award their base stats as stat experience. One Special stat; 65,535 per stat. Species data, not game availability.",
+    2: "Gold/Silver/Crystal: base stats award stat experience. Special uses the defeated Pokémon’s Special Attack. 65,535 per stat.",
+    3: "Ruby/Sapphire/Emerald and FireRed/LeafGreen: 510 total EVs, 255 per stat.",
+    4: "Diamond/Pearl/Platinum and HeartGold/SoulSilver: 510 total EVs, 255 per stat.",
+    5: "Black 2/White 2 yield table; some Black/White yields differ. 510 total EVs, 255 per stat.",
+    6: "X/Y and Omega Ruby/Alpha Sapphire: 510 total EVs, 252 per stat.",
+    7: "Sun/Moon and Ultra Sun/Ultra Moon. Let’s Go uses a different training system. 510 total EVs, 252 per stat.",
+    8: "Sword/Shield and Brilliant Diamond/Shining Pearl use EVs; Legends: Arceus uses effort levels. Species and forms are not filtered by game availability.",
+    9: "Scarlet/Violet: 510 total EVs, 252 per stat. Species and forms are not filtered by game availability.",
+  };
+  byId("generation-note").textContent =
+    notes[state.generation] +
+    " Battle bonuses, items, and Pokérus are not included.";
+};
 
 const bindControls = (): void => {
   byId<HTMLInputElement>("search").addEventListener("input", (event) => {
@@ -404,28 +453,60 @@ const bindControls = (): void => {
     state.sortDescending = !state.sortDescending;
     updateAndRender();
   });
-  const filterInputs: [string, keyof YieldFilters][] = [
-    ["exp", "exp"],
-    ...statKeys.map(
-      (stat) => [statToInput[stat], stat] as [string, keyof YieldFilters],
-    ),
-  ];
-  for (const [id, key] of filterInputs)
-    byId<HTMLInputElement>(id).addEventListener("input", (event) => {
-      const input = event.currentTarget as HTMLInputElement;
-      state.filters[key] = input.value.slice(0, 8);
-      input.setAttribute(
-        "aria-invalid",
-        /^(?:\*|\d+[+-]?)?$/.test(input.value.trim()) ? "false" : "true",
-      );
-      updateFilterDisclosure();
-      updateAndRender();
-    });
-  byId("clear-filters").addEventListener("click", () => {
-    for (const [, key] of filterInputs) state.filters[key] = "";
+  byId("filter-grid").addEventListener("input", (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || !input.dataset.filter) return;
+    const key = input.dataset.filter as keyof YieldFilters;
+    state.filters[key] = input.value.slice(0, 8);
+    input.setAttribute(
+      "aria-invalid",
+      /^(?:\*|\d+[+-]?)?$/.test(input.value.trim()) ? "false" : "true",
+    );
+    updateFilterDisclosure();
+    updateAndRender();
+  });
+  byId("filter-grid").addEventListener("click", (event) => {
+    if (
+      !(event.target instanceof Element) ||
+      !event.target.closest("#clear-filters")
+    )
+      return;
+    for (const key of statsForGeneration(state.generation))
+      state.filters[key] = "";
     syncControls();
     updateAndRender();
   });
+  byId<HTMLSelectElement>("generation").addEventListener(
+    "change",
+    async (event) => {
+      const generation = Number(
+        (event.currentTarget as HTMLSelectElement).value,
+      ) as Generation;
+      const oldState = state;
+      try {
+        try {
+          saveState(oldState);
+        } catch {
+          status("Local saving is unavailable");
+        }
+        const next = await loadPokemon(generation);
+        pokemon = next;
+        state = loadGenerationState(generation);
+        const known = new Set(pokemon.map((entry) => entry.id));
+        state.quickReference = state.quickReference.filter((id) =>
+          known.has(id),
+        );
+        history.replaceState(null, "", window.location.href.split("#")[0]);
+        syncControls();
+        updateAndRender();
+        status(`Generation ${generation} loaded`);
+      } catch (error) {
+        console.error(error);
+        setInput("generation", String(oldState.generation));
+        status(`Could not load Generation ${generation}`);
+      }
+    },
+  );
   byId("toggle-filter-fields").addEventListener("click", () => {
     const options = byId("ev-options");
     options.classList.toggle("filter-expanded");
@@ -455,7 +536,7 @@ const bindControls = (): void => {
       return;
     }
     history.replaceState(null, "", window.location.href.split("#")[0]);
-    state = defaultState();
+    state = defaultState(state.generation);
     syncControls();
     updateAndRender();
     status("Saved data cleared");
@@ -483,20 +564,32 @@ const bindControls = (): void => {
       trainee.name = input.value.replaceAll(/[\\/]/g, "").slice(0, 40);
     else if (
       input.dataset.field &&
-      statKeys.includes(input.dataset.field as (typeof statKeys)[number])
+      statsForGeneration(state.generation).includes(
+        input.dataset.field as (typeof statKeys)[number],
+      )
     )
       trainee.evs[input.dataset.field as (typeof statKeys)[number]] = Math.max(
         0,
-        Math.min(9999, Number.parseInt(input.value, 10) || 0),
+        Math.min(
+          statCap(state.generation),
+          Number.parseInt(input.value, 10) || 0,
+        ),
       );
     persistSoon();
-    const total = statKeys.reduce((sum, stat) => sum + trainee.evs[stat], 0);
+    const total = statsForGeneration(state.generation).reduce(
+      (sum, stat) => sum + trainee.evs[stat],
+      0,
+    );
     const totalElement = input
       .closest(".tracker-entry")
       ?.querySelector(".tracker-total");
     if (totalElement) {
-      totalElement.textContent = `${total} total EVs`;
-      totalElement.classList.toggle("over-limit", total > 510);
+      totalElement.textContent =
+        state.generation <= 2 ? `Up to 65,535 per stat` : `${total} / 510 EVs`;
+      totalElement.classList.toggle(
+        "over-limit",
+        state.generation > 2 && total > 510,
+      );
     }
     if (state.selectedTraineeId === trainee.id)
       byId("selected-trainee-summary").textContent =
@@ -513,7 +606,9 @@ const bindControls = (): void => {
     if (
       trainee &&
       stat &&
-      statKeys.includes(stat as (typeof statKeys)[number])
+      statsForGeneration(state.generation).includes(
+        stat as (typeof statKeys)[number],
+      )
     ) {
       input.value = String(trainee.evs[stat as (typeof statKeys)[number]]);
     }
@@ -545,13 +640,12 @@ const start = async (): Promise<void> => {
   bindDelegatedEvents();
   bindControls();
   try {
-    pokemon = await loadPokemon();
-    primary = primaryPokemon(pokemon);
     const loaded = loadState();
     state = loaded.state;
-    const knownDex = new Set(primary.map(({ dex }) => dex));
-    state.quickReference = state.quickReference.filter((dex) =>
-      knownDex.has(dex),
+    pokemon = await loadPokemon(state.generation);
+    const knownIds = new Set(pokemon.map(({ id }) => id));
+    state.quickReference = state.quickReference.filter((id) =>
+      knownIds.has(id),
     );
     syncControls();
     render();

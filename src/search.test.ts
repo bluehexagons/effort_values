@@ -3,9 +3,9 @@ import { matchesFilter, matchesPokemon, sortPokemon } from "./search.ts";
 import { defaultState, type Pokemon } from "./types.ts";
 
 const pikachu: Pokemon = {
+  id: "025",
   name: "Pikachu",
   dex: "025",
-  exp: 82,
   evs: {
     hp: 0,
     attack: 0,
@@ -13,6 +13,7 @@ const pikachu: Pokemon = {
     specialAttack: 0,
     specialDefense: 0,
     speed: 2,
+    special: 0,
   },
 };
 

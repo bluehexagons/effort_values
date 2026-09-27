@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#17324d" />
     <meta
       name="description"
-      content="Search Pokémon battle EV yields and track training progress."
+      content="Search Pokémon battle yields and track training from Generations I through IX."
     />
     <link rel="icon" href="./favicon.ico" />
-    <title>EV Yield Planner</title>
+    <title>Pokémon Training Planner</title>
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
@@ -18,10 +18,10 @@
       <header class="site-header">
         <div>
           <p class="eyebrow">Pokémon training utility</p>
-          <h1>EV Yield Planner</h1>
+          <h1>Pokémon Training Planner</h1>
           <p class="intro">
-            Find battle yields, save Pokémon you use often, and track EVs for
-            each trainee.
+            Find battle yields, save Pokémon you use often, and track training
+            for each trainee.
           </p>
         </div>
         <div class="header-actions">
@@ -40,6 +40,21 @@
         class="control-card"
         aria-label="Search and filters"
       >
+        <div class="generation-row">
+          <label for="generation">Game generation</label
+          ><select id="generation">
+            <option value="1">I · Red / Blue / Yellow</option>
+            <option value="2">II · Gold / Silver / Crystal</option>
+            <option value="3">III · GBA games</option>
+            <option value="4">IV · DS games</option>
+            <option value="5">V · Black 2 / White 2</option>
+            <option value="6">VI · 3DS games</option>
+            <option value="7">VII · Sun / Moon / Ultra</option>
+            <option value="8">VIII · Sword / Shield / BDSP</option>
+            <option value="9">IX · Scarlet / Violet</option>
+          </select>
+          <p id="generation-note"></p>
+        </div>
         <div class="search-main">
           <label class="search-field" for="search"
             ><span>Search Pokémon <kbd>/</kbd></span
@@ -76,36 +91,7 @@
             </button>
           </div>
           <div id="evform" class="ev-filter">
-            <div class="ev-filter-grid">
-              <label
-                ><span>EXP</span><input id="exp" type="text" maxlength="8"
-              /></label>
-              <label
-                ><span>HP</span><input id="hp" type="text" maxlength="8"
-              /></label>
-              <label
-                ><span>Attack</span><input id="atk" type="text" maxlength="8"
-              /></label>
-              <label
-                ><span>Defense</span><input id="def" type="text" maxlength="8"
-              /></label>
-              <label
-                ><span>Sp. Atk</span><input id="sat" type="text" maxlength="8"
-              /></label>
-              <label
-                ><span>Sp. Def</span><input id="sdf" type="text" maxlength="8"
-              /></label>
-              <label
-                ><span>Speed</span><input id="spd" type="text" maxlength="8"
-              /></label>
-              <button
-                id="clear-filters"
-                type="button"
-                class="quiet-button clear-filters"
-              >
-                Clear yield filters
-              </button>
-            </div>
+            <div id="filter-grid" class="ev-filter-grid"></div>
           </div>
         </div>
         <details id="settings" class="advanced-settings">
@@ -143,17 +129,7 @@
             </div>
             <div class="sort-controls">
               <label for="result-sort">Sort by</label>
-              <select id="result-sort">
-                <option value="dex">Pokédex #</option>
-                <option value="name">Name</option>
-                <option value="exp">EXP</option>
-                <option value="hp">HP</option>
-                <option value="attack">Attack</option>
-                <option value="defense">Defense</option>
-                <option value="specialAttack">Sp. Atk</option>
-                <option value="specialDefense">Sp. Def</option>
-                <option value="speed">Speed</option>
-              </select>
+              <select id="result-sort"></select>
               <button
                 id="reverse-sort"
                 type="button"
@@ -195,8 +171,28 @@
         <div id="details-content"></div>
       </dialog>
       <footer id="cc">
-        Pokémon and related names are trademarks of their respective owners.
-        Source code is available under the repository license.
+        Pokémon and related names are trademarks of their respective owners. EV
+        tables:
+        <a
+          href="https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_effort_value_yield"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Bulbapedia</a
+        >
+        (<a
+          href="https://creativecommons.org/licenses/by-nc-sa/2.5/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >CC BY-NC-SA 2.5</a
+        >). Historical base stats:
+        <a
+          href="https://github.com/PokeAPI/pokeapi"
+          target="_blank"
+          rel="noopener noreferrer"
+          >PokéAPI</a
+        >
+        (<a href="./DATA-LICENSES.md">license notice</a>). Source code is
+        available under the repository license.
       </footer>
     </main>
   </body>

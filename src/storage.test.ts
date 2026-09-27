@@ -12,7 +12,8 @@ describe("saved-state validation", () => {
       selected: 0,
       search: "pika",
     });
-    expect(state.version).toBe(4);
+    expect(state.version).toBe(5);
+    expect(state.generation).toBe(4);
     expect(state.quickReference).toEqual(["025"]);
     expect(state.trainees[0]?.evs.speed).toBe(60);
     expect(state.selectedTraineeId).toBe(state.trainees[0]?.id);
@@ -37,7 +38,7 @@ describe("saved-state validation", () => {
       selectedTraineeId: "one",
     });
     expect(state.trainees[0]?.name).toBe("badname");
-    expect(state.trainees[0]?.evs.hp).toBe(9999);
+    expect(state.trainees[0]?.evs.hp).toBe(255);
     expect(state.trainees[0]?.evs.attack).toBe(0);
     expect(state.trainees[0]?.evs.defense).toBe(2);
     expect(state.trainees[0]?.evs.specialAttack).toBe(0);
@@ -83,8 +84,47 @@ describe("saved-state validation", () => {
     const removeItem = vi.fn<() => void>();
     vi.stubGlobal("localStorage", { removeItem });
     clearStoredState();
-    expect(removeItem).toHaveBeenCalledTimes(2);
-    expect(removeItem).toHaveBeenNthCalledWith(1, "effort-values-state-v4");
-    expect(removeItem).toHaveBeenNthCalledWith(2, "effort-values-state-v2");
+    expect(removeItem).toHaveBeenCalledTimes(12);
+    expect(removeItem).toHaveBeenCalledWith("effort-values-state-v5-g1");
+    expect(removeItem).toHaveBeenCalledWith("effort-values-state-v5-g9");
+    expect(removeItem).toHaveBeenCalledWith("effort-values-state-v4");
+    expect(removeItem).toHaveBeenCalledWith("effort-values-state-v2");
+  });
+});
+
+describe("generation profiles", () => {
+  it("keeps Generation I stat experience and uses its 65,535 cap", () => {
+    const state = sanitizeState({
+      version: 5,
+      generation: 1,
+      trainees: [
+        {
+          id: "red",
+          name: "Red",
+          evs: { hp: 70000, special: 1234, specialAttack: 50 },
+        },
+      ],
+      filters: { special: "100+" },
+      sortKey: "special",
+    });
+    expect(state.trainees[0]?.evs.hp).toBe(65535);
+    expect(state.trainees[0]?.evs.special).toBe(1234);
+    expect(state.trainees[0]?.evs.specialAttack).toBe(0);
+    expect(state.filters.special).toBe("100+");
+    expect(state.sortKey).toBe("special");
+  });
+
+  it("migrates v4 progress into Generation IV", () => {
+    const state = sanitizeState({
+      version: 4,
+      sortKey: "exp",
+      quickReference: ["025"],
+      trainees: [{ id: "one", name: "One", evs: { speed: 200 } }],
+    });
+    expect(state.version).toBe(5);
+    expect(state.generation).toBe(4);
+    expect(state.sortKey).toBe("dex");
+    expect(state.quickReference).toEqual(["025"]);
+    expect(state.trainees[0]?.evs.speed).toBe(200);
   });
 });

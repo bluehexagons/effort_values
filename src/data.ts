@@ -1,63 +1,49 @@
-import { type Pokemon, statKeys } from "./types.ts";
+import {
+  type Generation,
+  type Pokemon,
+  emptyEvs,
+  statsForGeneration,
+} from "./types.ts";
 
-const asNumber = (value: string | undefined): number => {
-  const parsed = Number.parseInt(value ?? "", 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const displayName = (name: string): string =>
-  name.includes("(")
-    ? name.replace("(", " (").replaceAll(/([a-z])([A-Z])/g, "$1 $2")
-    : name;
-
-export const parsePokemonXml = (source: string): Pokemon[] => {
-  const document = new DOMParser().parseFromString(source, "application/xml");
-  const parserError = document.querySelector("parsererror");
-  if (parserError)
+interface DataRow {
+  id: string;
+  dex: string;
+  name: string;
+  yields: number[];
+}
+export const loadPokemon = async (
+  generation: Generation,
+): Promise<Pokemon[]> => {
+  const response = await fetch(
+    `${import.meta.env.BASE_URL}data/gen${generation}.json`,
+  );
+  if (!response.ok)
     throw new Error(
-      `Invalid Pokémon data: ${parserError.textContent ?? "parse error"}`,
+      `Could not load Generation ${generation} data (${response.status})`,
     );
-
-  return [...document.querySelectorAll("pokemon")].flatMap((node) => {
-    const name = node.querySelector("name")?.textContent?.trim();
-    const fields = node.querySelector("evs")?.textContent?.trim().split("/");
+  const rows = (await response.json()) as DataRow[];
+  const stats = statsForGeneration(generation);
+  if (!Array.isArray(rows) || rows.length === 0)
+    throw new Error("Pokémon data is empty");
+  return rows.map((row) => {
     if (
-      !name ||
-      fields?.length !== 8 ||
-      fields.some((field) => !/^\d+$/.test(field))
+      !row.id ||
+      !row.name ||
+      row.yields.length !== stats.length ||
+      row.yields.some((value) => !Number.isInteger(value) || value < 0)
     )
-      return [];
-
-    const values = fields.map(asNumber);
-    const dex = fields[7];
-    if (!dex) return [];
-    return [
-      {
-        name: displayName(name),
-        dex,
-        exp: values[0] ?? 0,
-        evs: Object.fromEntries(
-          statKeys.map((key, index) => [key, values[index + 1] ?? 0]),
-        ) as Pokemon["evs"],
-      },
-    ];
+      throw new Error(`Invalid Generation ${generation} data`);
+    const evs = emptyEvs();
+    stats.forEach((stat, index) => {
+      evs[stat] = row.yields[index] ?? 0;
+    });
+    return { id: row.id, dex: row.dex, name: row.name, evs };
   });
 };
-
-export const loadPokemon = async (): Promise<Pokemon[]> => {
-  const response = await fetch(`${import.meta.env.BASE_URL}pokemon.xml`);
-  if (!response.ok)
-    throw new Error(`Could not load Pokémon data (${response.status})`);
-  const pokemon = parsePokemonXml(await response.text());
-  if (pokemon.length === 0) throw new Error("Pokémon data is empty");
-  return pokemon;
-};
-
-export const primaryPokemon = (pokemon: readonly Pokemon[]): Pokemon[] =>
-  pokemon.filter(({ name }) => !name.includes("("));
-
-export const totalYield = ({ evs }: Pokemon): number =>
-  statKeys.reduce((total, stat) => total + evs[stat], 0);
-
+export const totalYield = (pokemon: Pokemon, generation: Generation): number =>
+  statsForGeneration(generation).reduce(
+    (total, stat) => total + pokemon.evs[stat],
+    0,
+  );
 export const spriteUrl = ({ dex }: Pokemon): string =>
   `${import.meta.env.BASE_URL}img/${dex}MS.png`;
