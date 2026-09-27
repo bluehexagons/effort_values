@@ -22,13 +22,26 @@ describe("saved-state validation", () => {
     const state = sanitizeState({
       version: 4,
       trainees: [
-        { id: "one", name: "bad/name", evs: { hp: 99_999, attack: -2 } },
+        {
+          id: "one",
+          name: "bad/name",
+          evs: {
+            hp: 99_999,
+            attack: -2,
+            defense: 2.5,
+            specialAttack: true,
+            speed: "3oops",
+          },
+        },
       ],
       selectedTraineeId: "one",
     });
     expect(state.trainees[0]?.name).toBe("badname");
     expect(state.trainees[0]?.evs.hp).toBe(9999);
     expect(state.trainees[0]?.evs.attack).toBe(0);
+    expect(state.trainees[0]?.evs.defense).toBe(2);
+    expect(state.trainees[0]?.evs.specialAttack).toBe(0);
+    expect(state.trainees[0]?.evs.speed).toBe(0);
   });
 
   it("preserves compatible legacy settings without selecting a trainee", () => {

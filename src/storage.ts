@@ -31,8 +31,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const boundedNumber = (value: unknown): number => {
   const number =
-    typeof value === "number" ? value : Number.parseInt(String(value), 10);
-  return Number.isFinite(number) ? Math.max(0, Math.min(9999, number)) : 0;
+    typeof value === "number" || typeof value === "string"
+      ? Number(value)
+      : Number.NaN;
+  return Number.isFinite(number)
+    ? Math.max(0, Math.min(9999, Math.trunc(number)))
+    : 0;
 };
 
 const integer = (value: unknown, fallback: number): number => {

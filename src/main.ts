@@ -1,3 +1,4 @@
+// oxlint-disable-next-line import/no-unassigned-import -- Vite bundles this stylesheet for its side effect.
 import "./styles.css";
 import { loadPokemon, primaryPokemon } from "./data.ts";
 import {
@@ -191,13 +192,14 @@ const addReference = (dex: string): void => {
   status(`${entry.name} added to Quick Reference`);
 };
 
-const addYield = (dex: string): void => {
+const addYield = (dex: string, traineeId?: string): void => {
   const entry = pokemonByDex(dex);
-  const trainee = selectedTrainee();
+  const trainee = traineeId ? traineeById(traineeId) : selectedTrainee();
   if (!entry || !trainee) {
     status("Select a trainee before adding a battle yield");
     return;
   }
+  if (traineeId) state.selectedTraineeId = trainee.id;
   for (const stat of statKeys)
     trainee.evs[stat] = Math.min(9999, trainee.evs[stat] + entry.evs[stat]);
   updateAndRender();
@@ -321,10 +323,7 @@ const bindDelegatedEvents = (): void => {
     if (card?.dataset.dex && event.dataTransfer)
       event.dataTransfer.setData("text/plain", card.dataset.dex);
   });
-  for (const [id, onDrop] of [
-    ["quickchart", addReference],
-    ["evtracker", addYield],
-  ] as const) {
+  for (const id of ["quickchart", "evtracker"] as const) {
     const target = byId(id);
     target.addEventListener("dragover", (event) => {
       event.preventDefault();
@@ -336,7 +335,16 @@ const bindDelegatedEvents = (): void => {
     target.addEventListener("drop", (event) => {
       event.preventDefault();
       target.classList.remove("drop-target");
-      onDrop(event.dataTransfer?.getData("text/plain") ?? "");
+      const dex = event.dataTransfer?.getData("text/plain") ?? "";
+      if (id === "quickchart") {
+        addReference(dex);
+      } else {
+        const card =
+          event.target instanceof Element
+            ? event.target.closest<HTMLElement>("[data-trainee-id]")
+            : null;
+        addYield(dex, card?.dataset.traineeId);
+      }
     });
   }
 };
