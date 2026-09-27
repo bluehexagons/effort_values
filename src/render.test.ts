@@ -28,4 +28,10 @@ describe("result rendering", () => {
       'class="primary-action yield-action" data-action="yield" data-dex="025" disabled',
     );
   });
+
+  it("shows when a Pokémon is already saved", () => {
+    expect(renderResult(pikachu, false, true, true)).toContain(
+      'aria-label="Pikachu saved for later" disabled',
+    );
+  });
 });

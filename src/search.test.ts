@@ -30,10 +30,19 @@ describe("Pokémon search", () => {
   it("combines name and EV filters", () => {
     const state = defaultState();
     state.query = "kachu";
+    state.filterEnabled = true;
     state.filters.speed = "2";
     expect(matchesPokemon(pikachu, state)).toBe(true);
     state.filters.speed = "3+";
     expect(matchesPokemon(pikachu, state)).toBe(false);
+  });
+
+  it("shows results for a yield filter without a name query", () => {
+    const state = defaultState();
+    expect(matchesPokemon(pikachu, state)).toBe(false);
+    state.filterEnabled = true;
+    state.filters.speed = "2";
+    expect(matchesPokemon(pikachu, state)).toBe(true);
   });
 
   it("sorts without mutating the source", () => {

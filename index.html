@@ -20,8 +20,8 @@
           <p class="eyebrow">Pokémon training utility</p>
           <h1>EV Yield Planner</h1>
           <p class="intro">
-            Find battle yields, keep a quick reference, and apply EVs to the
-            Pokémon you are training.
+            Find battle yields, save Pokémon you use often, and track EVs for
+            each trainee.
           </p>
         </div>
         <div class="header-actions">
@@ -42,7 +42,7 @@
       >
         <div class="search-main">
           <label class="search-field" for="search"
-            ><span>Find a Pokémon <kbd>/</kbd></span
+            ><span>Search Pokémon <kbd>/</kbd></span
             ><input
               id="search"
               type="search"
@@ -51,16 +51,7 @@
               placeholder="Pikachu or Bulbasaur…"
           /></label>
           <div class="search-count">
-            <strong id="count">Loading…</strong><span>matching yields</span>
-          </div>
-          <div class="filter-toggles">
-            <label
-              ><input id="within-filter" type="checkbox" /> Match anywhere in
-              name</label
-            >
-            <label
-              ><input id="showall" type="checkbox" /> Dim non-matches</label
-            >
+            <strong id="count">Loading…</strong><span>results</span>
           </div>
         </div>
         <div id="ev-options">
@@ -70,8 +61,8 @@
               <span
                 ><strong>Filter by yield</strong
                 ><small
-                  >Use an exact number, <code>2+</code>, or
-                  <code>1-</code>.</small
+                  >Use an exact number, <code>2+</code> for at least 2, or
+                  <code>1-</code> for at most 1.</small
                 ></span
               ></label
             >
@@ -118,10 +109,18 @@
           </div>
         </div>
         <details id="settings" class="advanced-settings">
-          <summary>More search options</summary>
+          <summary>Search options</summary>
           <div>
             <label
-              ><input id="loadall" type="checkbox" /> Show all when search is
+              ><input id="within-filter" type="checkbox" /> Match anywhere in
+              name</label
+            >
+            <label
+              ><input id="showall" type="checkbox" /> Show non-matches
+              dimmed</label
+            >
+            <label
+              ><input id="loadall" type="checkbox" /> Browse all when search is
               empty</label
             >
           </div>
@@ -139,7 +138,7 @@
                 class="selected-summary"
                 role="status"
                 aria-live="polite"
-                >Select a trainee to add yields</span
+                >Add a trainee to track yields</span
               >
             </div>
             <div class="sort-controls">
@@ -174,14 +173,21 @@
               <p class="eyebrow">Your session</p>
               <h2>Training workspace</h2>
               <p>
-                Choose a trainee, then add yields from results or the reference
-                list.
+                Add a trainee, then search for Pokémon to record their yields.
               </p>
             </div>
+            <button
+              id="add-trainee"
+              type="button"
+              class="primary-action"
+              data-action="add-trainee"
+            >
+              Add trainee
+            </button>
           </div>
           <section id="workspace" aria-label="Saved lists">
-            <div id="quickchart"></div>
             <div id="evtracker"></div>
+            <div id="quickchart"></div>
           </section>
         </div>
       </div>

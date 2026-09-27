@@ -1,6 +1,13 @@
 # EV Yield Planner
 
-A static Pokémon effort-value yield search and training tracker. It supports responsive layouts, local autosave, shareable setup links, quick-reference lists, and multiple named trainees.
+A static Pokémon effort-value yield search and training tracker. It supports responsive layouts, local autosave, shareable setup links, saved Pokémon, and multiple named trainees.
+
+## Using the planner
+
+1. Add a trainee and give it a name. New trainees are selected automatically.
+2. Search for a Pokémon, or turn on yield filters to find a specific EV yield.
+3. Use the EV button on a result to record its yield for the selected trainee. Choose **Save** to keep a Pokémon in the saved list for later.
+4. Use **Share setup** to copy a link containing the current setup. Changes also save automatically in your browser.
 
 ## Development
 

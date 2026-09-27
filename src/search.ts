@@ -19,9 +19,14 @@ export const matchesFilter = (value: number, filter: string): boolean => {
 export const matchesPokemon = (pokemon: Pokemon, state: AppState): boolean => {
   const query = state.query.trim().toLocaleLowerCase();
   const name = pokemon.name.toLocaleLowerCase();
+  const hasYieldFilter =
+    state.filterEnabled &&
+    (["exp", ...statKeys] as const).some(
+      (key) => state.filters[key].trim() !== "",
+    );
   const nameMatches =
     query === ""
-      ? state.showAllWhenEmpty
+      ? state.showAllWhenEmpty || hasYieldFilter
       : state.matchAnywhere
         ? name.includes(query)
         : name.startsWith(query);

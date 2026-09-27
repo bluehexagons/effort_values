@@ -53,12 +53,13 @@ export const renderResult = (
   pokemon: Pokemon,
   dimmed: boolean,
   selected: boolean,
+  saved = false,
 ): string => {
   const total = totalYield(pokemon);
   return `<article class="result-card${dimmed ? " dim" : ""}" data-dex="${pokemon.dex}" draggable="true">
     <div class="result-identity">${sprite(pokemon)}<div><strong>${escapeHtml(pokemon.name)}</strong><br /><small>#${pokemon.dex} · ${pokemon.exp} EXP</small></div></div>
     <div class="result-actions">
-      <button type="button" data-action="reference" data-dex="${pokemon.dex}">${icon("plus")} Reference</button>
+      <button type="button" data-action="reference" data-dex="${pokemon.dex}" aria-label="${saved ? `${escapeHtml(pokemon.name)} saved for later` : `Save ${escapeHtml(pokemon.name)} for later`}"${saved ? " disabled" : ""}>${icon(saved ? "check" : "plus")} ${saved ? "Saved" : "Save"}</button>
       <button type="button" class="primary-action yield-action" data-action="yield" data-dex="${pokemon.dex}"${selected ? "" : " disabled"}>${icon("plus")} Add ${total} EV${total === 1 ? "" : "s"}</button>
       <button type="button" data-action="details" data-dex="${pokemon.dex}">Details</button>
     </div>
@@ -74,15 +75,15 @@ export const renderQuickReference = (
     .map((entry) => {
       const total = totalYield(entry);
       return `<article class="quick-card" data-dex="${entry.dex}" draggable="true">
-      <div class="quick-meta"><div class="quick-identity">${sprite(entry)}<div><strong>${escapeHtml(entry.name)}</strong><br /><small>#${entry.dex} · ${entry.exp} EXP</small></div></div><button type="button" class="icon-button" data-action="remove-reference" data-dex="${entry.dex}" aria-label="Remove ${escapeHtml(entry.name)}">${icon("trash")}</button></div>
+      <div class="quick-meta"><div class="quick-identity">${sprite(entry)}<div><strong>${escapeHtml(entry.name)}</strong><br /><small>#${entry.dex} · ${entry.exp} EXP</small></div></div><button type="button" class="icon-button" data-action="remove-reference" data-dex="${entry.dex}" aria-label="Remove ${escapeHtml(entry.name)} from saved Pokémon">${icon("trash")}</button></div>
       <div class="ev-pills">${pills(entry)}</div>
       <div class="quick-actions"><button type="button" class="primary-action yield-action" data-action="yield" data-dex="${entry.dex}"${selected ? "" : " disabled"}>${icon("plus")} Add ${total} EV${total === 1 ? "" : "s"}</button><a class="text-link" href="${bulbapediaUrl(entry.name)}" target="_blank" rel="noopener noreferrer">Bulbapedia ${icon("external")}</a></div>
     </article>`;
     })
     .join("");
-  return `<div class="panel-title"><span>${icon("list")} Quick Reference</span><small>Battle yields</small></div>
-    ${cards || '<div class="empty-state"><strong>No reference Pokémon yet.</strong><br />Use Reference on a result to keep its yield handy.</div>'}
-    ${cards ? `<div class="panel-footer"><button type="button" class="quiet-button" data-action="clear-reference">${icon("trash")} Clear reference</button></div>` : ""}`;
+  return `<div class="panel-title"><span>${icon("list")} Saved Pokémon</span><small>Quick access</small></div>
+    ${cards || '<div class="empty-state"><strong>No saved Pokémon yet.</strong><br />Choose Save on a result to keep it here.</div>'}
+    ${cards ? `<div class="panel-footer"><button type="button" class="quiet-button" data-action="clear-reference">${icon("trash")} Clear saved list</button></div>` : ""}`;
 };
 
 export const renderTracker = (
@@ -106,9 +107,8 @@ export const renderTracker = (
     </article>`;
     })
     .join("");
-  return `<div class="panel-title"><span>${icon("list")} Training Tracker</span><small>Select who receives yields</small></div>
-    ${cards || '<div class="empty-state"><strong>No trainees yet.</strong><br />Add a row, name the Pokémon you are training, then select it.</div>'}
-    <div class="panel-footer"><button type="button" class="primary-action" data-action="add-trainee">${icon("plus")} Add trainee</button></div>`;
+  return `<div class="panel-title"><span>${icon("list")} Trainees</span><small>Select who receives yields</small></div>
+    ${cards || '<div class="empty-state"><strong>No trainees yet.</strong><br />Use Add trainee above to start tracking EVs.</div>'}`;
 };
 
 export const renderDetails = (

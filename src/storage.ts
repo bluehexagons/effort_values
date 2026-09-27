@@ -162,10 +162,10 @@ export const sanitizeState = (value: unknown): AppState => {
     version: 4,
     query: typeof value.query === "string" ? value.query.slice(0, 80) : "",
     filters,
-    filterEnabled: value.filterEnabled !== false,
+    filterEnabled: value.filterEnabled === true,
     matchAnywhere: value.matchAnywhere !== false,
     showNonMatches: value.showNonMatches === true,
-    showAllWhenEmpty: value.showAllWhenEmpty !== false,
+    showAllWhenEmpty: value.showAllWhenEmpty === true,
     sortKey:
       typeof value.sortKey === "string" &&
       sortKeys.has(value.sortKey as SortKey)

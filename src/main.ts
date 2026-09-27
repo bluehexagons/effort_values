@@ -91,10 +91,12 @@ const updateFilterDisclosure = (revealActive = false): void => {
   const options = byId("ev-options");
   const button = byId<HTMLButtonElement>("toggle-filter-fields");
   const count = activeFilterCount();
-  if (revealActive && count > 0) options.classList.add("filter-expanded");
+  if (!state.filterEnabled) options.classList.remove("filter-expanded");
+  else if (revealActive && count > 0) options.classList.add("filter-expanded");
   const expanded = options.classList.contains("filter-expanded");
   button.disabled = !state.filterEnabled;
-  button.textContent = `${expanded ? "Hide" : "Edit"} values${count > 0 ? ` (${count})` : ""}`;
+  button.hidden = !state.filterEnabled;
+  button.textContent = `${expanded ? "Hide" : "Edit"} filters${count > 0 ? ` (${count})` : ""}`;
   button.setAttribute("aria-expanded", String(expanded));
 };
 
@@ -114,6 +116,13 @@ const render = (): void => {
   const sorted = sortPokemon(primary, state);
   const matching = sorted.filter((entry) => matchesPokemon(entry, state));
   const visible = state.showNonMatches ? sorted : matching;
+  const noResultsMessage =
+    state.query.trim() === "" &&
+    (!state.filterEnabled || activeFilterCount() === 0)
+      ? state.filterEnabled
+        ? '<div class="empty-state"><strong>Enter a yield value.</strong><br />Choose a stat above, or search by Pokémon name.</div>'
+        : '<div class="empty-state"><strong>Start with a search.</strong><br />Enter a Pokémon name or turn on yield filters to find battle sources.</div>'
+      : '<div class="empty-state"><strong>No matching Pokémon.</strong><br />Try a broader name or clear a yield filter.</div>';
   byId("count").textContent = String(matching.length);
   byId("result-list").innerHTML = visible.length
     ? visible
@@ -122,10 +131,11 @@ const render = (): void => {
             entry,
             !matchesPokemon(entry, state),
             Boolean(selectedTrainee()),
+            state.quickReference.includes(entry.dex),
           ),
         )
         .join("")
-    : '<div class="empty-state"><strong>No matching Pokémon.</strong><br />Try a broader name or clear a yield filter.</div>';
+    : noResultsMessage;
   const references = state.quickReference.flatMap(
     (dex) => pokemonByDex(dex) ?? [],
   );
@@ -141,7 +151,7 @@ const render = (): void => {
   const summary = byId("selected-trainee-summary");
   summary.textContent = selected
     ? `Adding to: ${selected.name || "Unnamed trainee"}`
-    : "Select a trainee to add yields";
+    : "Add a trainee to track yields";
   summary.classList.toggle("has-selection", Boolean(selected));
 };
 
@@ -172,7 +182,7 @@ const updateSelectionUi = (): void => {
   const summary = byId("selected-trainee-summary");
   summary.textContent = selected
     ? `Adding to: ${selected.name || "Unnamed trainee"}`
-    : "Select a trainee to add yields";
+    : "Add a trainee to track yields";
   summary.classList.toggle("has-selection", Boolean(selected));
 };
 
@@ -180,16 +190,16 @@ const addReference = (dex: string): void => {
   const entry = pokemonByDex(dex);
   if (!entry) return;
   if (state.quickReference.includes(dex)) {
-    status(`${entry.name} is already in Quick Reference`);
+    status(`${entry.name} is already saved`);
     return;
   }
   if (state.quickReference.length >= MAX_QUICK_REFERENCE) {
-    status(`Quick Reference is limited to ${MAX_QUICK_REFERENCE} Pokémon`);
+    status(`The saved list is limited to ${MAX_QUICK_REFERENCE} Pokémon`);
     return;
   }
   state.quickReference.push(dex);
   updateAndRender();
-  status(`${entry.name} added to Quick Reference`);
+  status(`${entry.name} saved for later`);
 };
 
 const addYield = (dex: string, traineeId?: string): void => {
@@ -381,6 +391,7 @@ const bindControls = (): void => {
   byId<HTMLInputElement>("byev").addEventListener("change", (event) => {
     state.filterEnabled = (event.currentTarget as HTMLInputElement).checked;
     byId("evform").hidden = !state.filterEnabled;
+    byId("ev-options").classList.toggle("filter-expanded", state.filterEnabled);
     updateFilterDisclosure();
     updateAndRender();
   });
