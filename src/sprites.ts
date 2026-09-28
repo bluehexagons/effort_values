@@ -5,6 +5,7 @@ import {
 } from "./sprite-sheets.ts";
 
 export const spriteForDex = (dex: string) => {
+  if (!/^\d{1,4}$/.test(dex)) return null;
   const number = Number(dex);
   const sheet = spriteSheets.find(
     ({ start, end }) => number >= start && number <= end,

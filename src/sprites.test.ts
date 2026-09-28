@@ -19,6 +19,11 @@ describe("sprite sheets", () => {
     }
   });
 
+  it("rejects malformed and out-of-range Dex numbers", () => {
+    for (const dex of ["", "0", "1026", "1e2", "0x19", "25-form"])
+      expect(spriteForDex(dex)).toBeNull();
+  });
+
   it("matches the dimensions of every generated PNG", async () => {
     for (const sheet of spriteSheets) {
       const png = await readFile(
