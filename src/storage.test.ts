@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { clearStoredState, sanitizeState } from "./storage.ts";
+import { clearStoredState } from "./storage.ts";
+import { sanitizeState } from "./state-validation.ts";
 
 afterEach(() => vi.unstubAllGlobals());
 

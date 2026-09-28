@@ -40,6 +40,17 @@ npm run dev
 - `npm run check:fix` — apply lint fixes and formatting
 - `npm run preview` — serve the production bundle
 
+## Code layout
+
+- `src/main.ts` binds the app and starts the initial render.
+- `src/app.ts` owns profile loading, the current Pokémon list, and autosave.
+- `src/controls.ts` binds search, filter, sort, generation, share, and reset controls.
+- `src/workspace.ts` handles saved Pokémon, trainee actions, manual totals, and drag and drop.
+- `src/view.ts` updates the DOM; `src/render.ts` contains the HTML templates.
+- `src/state-validation.ts` validates and migrates saved state; `src/storage.ts` handles local storage and share links.
+- `src/types.ts`, `src/data.ts`, `src/search.ts`, and `src/training.ts` hold the shared models and game logic.
+- `src/generation.ts` holds the generation-specific guidance shown in the interface.
+
 `npm run build` writes the static site to `dist/`. Vite uses relative asset paths, so the output works from a GitHub Pages project subdirectory.
 
 ## License
