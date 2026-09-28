@@ -5246,13 +5246,13 @@
   {
     "id": "1024-terastal",
     "dex": "1024",
-    "name": "Terapagos ( Terastal Form)",
+    "name": "Terapagos (Terastal Form)",
     "yields": [0, 0, 2, 0, 2, 0]
   },
   {
     "id": "1024-stellar",
     "dex": "1024",
-    "name": "Terapagos ( Stellar Form)",
+    "name": "Terapagos (Stellar Form)",
     "yields": [3, 0, 0, 0, 0, 0]
   },
   {

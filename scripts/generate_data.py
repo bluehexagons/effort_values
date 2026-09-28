@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WIKI = {3: 4081751, 4: 4081750, 5: 4320818, 6: 4320818, 7: 4320879, 8: 4324514, 9: 4575864}
+EXPECTED_COUNTS = {1: 151, 2: 251, 3: 389, 4: 498, 5: 662, 6: 734, 7: 827, 8: 929, 9: 1062}
 LIMIT = {3: 386, 4: 493, 5: 649, 6: 721, 7: 807, 8: 898, 9: 1025}
 POKEAPI_REV = '168b1e89467054cda2e7df43ccebbb69b459497a'
 HEADERS = {'User-Agent': 'EffortValuesPlanner/1.0 (historical data regeneration)'}
@@ -70,6 +71,8 @@ def fields(template):
 
 def write(generation, rows):
     path = ROOT / 'public' / 'data' / f'gen{generation}.json'
+    if len(rows) != EXPECTED_COUNTS[generation]:
+        raise ValueError(f'Generation {generation}: expected {EXPECTED_COUNTS[generation]} entries, got {len(rows)}')
     path.write_text(json.dumps(rows, ensure_ascii=False, separators=(',', ':')) + '\n')
     print(f'Generation {generation}: {len(rows)} Pokémon')
 
@@ -115,7 +118,7 @@ for generation, revision in WIKI.items():
         dex = int(positional[0])
         if dex > LIMIT[generation]:
             continue
-        name = positional[1]
+        name = positional[1].strip()
         yields = positional[3:9]
         if not all(value.isdigit() for value in yields):
             raise ValueError((generation, dex, yields))
@@ -128,7 +131,7 @@ for generation, revision in WIKI.items():
             base = next((row for row in rows if row['dex'] == f'{dex:03}'), None)
             if base and base['yields'] == list(map(int, yields)):
                 continue
-            label = positional[9] if len(positional) > 9 else form
+            label = positional[9].strip() if len(positional) > 9 else form
             name = f'{name} ({label})'
             slug = re.sub('[^a-z0-9]+', '-', form.lower()).strip('-')
             identifier = f'{dex:03}-{slug}' if f'{dex:03}' in seen else f'{dex:03}'

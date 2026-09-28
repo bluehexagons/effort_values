@@ -2,12 +2,14 @@
 import "./styles.css";
 import { loadPokemon } from "./data.ts";
 import {
+  escapeHtml,
   renderDetails,
   renderQuickReference,
   renderResult,
   renderTracker,
 } from "./render.ts";
 import { matchesPokemon, sortPokemon } from "./search.ts";
+import { recordBattleYield } from "./training.ts";
 import {
   clearStoredState,
   encodeState,
@@ -42,6 +44,7 @@ let state: AppState = defaultState();
 let pokemon: Pokemon[] = [];
 
 let saveTimer: number | undefined;
+const sessionProfiles = new Map<Generation, AppState>();
 
 const pokemonById = (id: string): Pokemon | undefined =>
   pokemon.find((entry) => entry.id === id);
@@ -215,28 +218,7 @@ const addYield = (id: string, traineeId?: string): void => {
     return;
   }
   if (traineeId) state.selectedTraineeId = trainee.id;
-  let remaining =
-    state.generation <= 2
-      ? Infinity
-      : Math.max(
-          0,
-          510 -
-            statsForGeneration(state.generation).reduce(
-              (sum, stat) => sum + trainee.evs[stat],
-              0,
-            ),
-        );
-  let gained = 0;
-  for (const stat of statsForGeneration(state.generation)) {
-    const gain = Math.min(
-      entry.evs[stat],
-      statCap(state.generation) - trainee.evs[stat],
-      remaining,
-    );
-    trainee.evs[stat] += gain;
-    gained += gain;
-    remaining -= gain;
-  }
+  const gained = recordBattleYield(trainee, entry, state.generation);
   updateAndRender();
   status(
     gained > 0
@@ -391,7 +373,7 @@ const renderGenerationControls = (): void => {
     stats
       .map(
         (stat) =>
-          `<label><span>${statLabels[stat]}</span><input data-filter="${stat}" type="text" maxlength="8" value="${state.filters[stat]}" /></label>`,
+          `<label><span>${statLabels[stat]}</span><input data-filter="${stat}" type="text" maxlength="8" value="${escapeHtml(state.filters[stat])}" /></label>`,
       )
       .join("") +
     '<button id="clear-filters" type="button" class="quiet-button clear-filters">Clear yield filters</button>';
@@ -402,19 +384,19 @@ const renderGenerationControls = (): void => {
       .join("");
   setInput("result-sort", state.sortKey);
   const notes: Record<Generation, string> = {
-    1: "Red/Blue/Yellow: defeated Pokémon award their base stats as stat experience. One Special stat; 65,535 per stat. Species data, not game availability.",
-    2: "Gold/Silver/Crystal: base stats award stat experience. Special uses the defeated Pokémon’s Special Attack. 65,535 per stat.",
-    3: "Ruby/Sapphire/Emerald and FireRed/LeafGreen: 510 total EVs, 255 per stat.",
-    4: "Diamond/Pearl/Platinum and HeartGold/SoulSilver: 510 total EVs, 255 per stat.",
+    1: "Red/Blue/Yellow: defeated Pokémon award base stats as stat experience. One Special stat; 65,535 per stat. Multiple battlers split the gain.",
+    2: "Gold/Silver/Crystal: base stats award stat experience. Special uses the defeated Pokémon’s Special Attack. Multiple battlers split the gain; 65,535 per stat.",
+    3: "Ruby/Sapphire/Emerald and FireRed/LeafGreen: 510 total EVs, 255 per stat. Level 100 Pokémon cannot gain battle EVs.",
+    4: "Diamond/Pearl/Platinum and HeartGold/SoulSilver: 510 total EVs, 255 per stat. Level 100 Pokémon cannot gain battle EVs.",
     5: "Black 2/White 2 yield table; some Black/White yields differ. 510 total EVs, 255 per stat.",
     6: "X/Y and Omega Ruby/Alpha Sapphire: 510 total EVs, 252 per stat.",
     7: "Sun/Moon and Ultra Sun/Ultra Moon. Let’s Go uses a different training system. 510 total EVs, 252 per stat.",
-    8: "Sword/Shield and Brilliant Diamond/Shining Pearl use EVs; Legends: Arceus uses effort levels. Species and forms are not filtered by game availability.",
-    9: "Scarlet/Violet: 510 total EVs, 252 per stat. Species and forms are not filtered by game availability.",
+    8: "Sword/Shield and Brilliant Diamond/Shining Pearl use EVs; Legends: Arceus uses effort levels.",
+    9: "Scarlet/Violet: 510 total EVs, 252 per stat.",
   };
   byId("generation-note").textContent =
     notes[state.generation] +
-    " Battle bonuses, items, and Pokérus are not included.";
+    " Species and forms are not filtered by game availability. Battle bonuses, items, and Pokérus are not included.";
 };
 
 const bindControls = (): void => {
@@ -479,19 +461,25 @@ const bindControls = (): void => {
   byId<HTMLSelectElement>("generation").addEventListener(
     "change",
     async (event) => {
-      const generation = Number(
-        (event.currentTarget as HTMLSelectElement).value,
-      ) as Generation;
+      const selector = event.currentTarget as HTMLSelectElement;
+      const generation = Number(selector.value) as Generation;
       const oldState = state;
+      selector.disabled = true;
+      byId<HTMLButtonElement>("reset-state").disabled = true;
+      window.clearTimeout(saveTimer);
+      sessionProfiles.set(oldState.generation, oldState);
+      let saved = true;
       try {
         try {
           saveState(oldState);
         } catch {
-          status("Local saving is unavailable");
+          saved = false;
         }
         const next = await loadPokemon(generation);
         pokemon = next;
-        state = loadGenerationState(generation);
+        state =
+          sessionProfiles.get(generation) ?? loadGenerationState(generation);
+        sessionProfiles.set(generation, state);
         const known = new Set(pokemon.map((entry) => entry.id));
         state.quickReference = state.quickReference.filter((id) =>
           known.has(id),
@@ -499,11 +487,21 @@ const bindControls = (): void => {
         history.replaceState(null, "", window.location.href.split("#")[0]);
         syncControls();
         updateAndRender();
-        status(`Generation ${generation} loaded`);
+        try {
+          saveState(state);
+        } catch {
+          saved = false;
+        }
+        status(
+          `Generation ${generation} loaded${saved ? "" : "; local saving is unavailable"}`,
+        );
       } catch (error) {
         console.error(error);
         setInput("generation", String(oldState.generation));
         status(`Could not load Generation ${generation}`);
+      } finally {
+        selector.disabled = false;
+        byId<HTMLButtonElement>("reset-state").disabled = false;
       }
     },
   );
@@ -536,7 +534,9 @@ const bindControls = (): void => {
       return;
     }
     history.replaceState(null, "", window.location.href.split("#")[0]);
+    sessionProfiles.clear();
     state = defaultState(state.generation);
+    sessionProfiles.set(state.generation, state);
     syncControls();
     updateAndRender();
     status("Saved data cleared");
@@ -642,6 +642,7 @@ const start = async (): Promise<void> => {
   try {
     const loaded = loadState();
     state = loaded.state;
+    sessionProfiles.set(state.generation, state);
     pokemon = await loadPokemon(state.generation);
     const knownIds = new Set(pokemon.map(({ id }) => id));
     state.quickReference = state.quickReference.filter((id) =>
