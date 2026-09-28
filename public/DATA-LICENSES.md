@@ -21,3 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 ## Bulbapedia
 
 Yield tables in `public/data/gen3.json` through `gen9.json` are derived from Bulbapedia table revisions pinned in `scripts/generate_data.py` and are shared under CC BY-NC-SA 2.5. Attribution and source links are in README.md.
+
+## Pokémon sprites
+
+`public/sprites/gen1.png` through `gen9.png` were generated from the default front sprites in [PokéAPI/sprites](https://github.com/PokeAPI/sprites) at commit `fb3512817b9c3f46952b3f89e82645e77bdcaf49`. See `scripts/generate_sprites.py` for the transformation. The upstream repository states that the images are owned by The Pokémon Company; some later pixel sprites were made by community artists credited in its [README](https://github.com/PokeAPI/sprites#credits). The repository's CC0 notice does not transfer third-party rights in the Pokémon images. These images are not licensed under this project's Apache license.

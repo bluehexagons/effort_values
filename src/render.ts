@@ -1,4 +1,5 @@
-import { spriteUrl, totalYield } from "./data.ts";
+import { totalYield } from "./data.ts";
+import { spriteForDex } from "./sprites.ts";
 import {
   type Generation,
   type Pokemon,
@@ -31,10 +32,12 @@ const icon = (
 };
 const bulbapediaUrl = (name: string): string =>
   `https://bulbapedia.bulbagarden.net/wiki/${encodeURIComponent(name.split(" (")[0] ?? name)}_(Pok%C3%A9mon)`;
-const sprite = (pokemon: Pokemon): string =>
-  Number(pokemon.dex) <= 493
-    ? `<span class="sprite-wrap"><img src="${spriteUrl(pokemon)}" alt="" width="32" height="32" loading="lazy" decoding="async" /></span>`
-    : '<span class="sprite-wrap"><span class="sprite-fallback" aria-hidden="true">◈</span></span>';
+const sprite = (pokemon: Pokemon): string => {
+  const sheet = spriteForDex(pokemon.dex);
+  if (!sheet)
+    return '<span class="sprite-wrap no-sprite"><span class="sprite-fallback" aria-hidden="true">◈</span></span>';
+  return `<span class="sprite-wrap"><span class="sprite-art"><img src="${sheet.url}" alt="" width="${sheet.width}" height="${sheet.height}" loading="lazy" decoding="async" style="left:-${sheet.x}px;top:-${sheet.y}px" /></span><span class="sprite-fallback" aria-hidden="true">◈</span></span>`;
+};
 const actionLabel = (generation: Generation, amount: number): string =>
   generation <= 2
     ? "Record battle"

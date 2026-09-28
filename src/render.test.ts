@@ -18,21 +18,40 @@ const pikachu: Pokemon = {
 };
 
 describe("result rendering", () => {
-  it("keeps pixel sprites at their native dimensions", () => {
+  it("uses the pinned sprite sheet for the species", () => {
     const result = renderResult(pikachu, 4, false, true);
-    expect(result).toContain('width="32" height="32"');
-    expect(result).toContain("img/025MS.png");
+    expect(result).toContain("sprites/gen1.png");
+    expect(result).toContain('style="left:-320px;top:-40px"');
   });
 
-  it("shows a fallback for Pokémon without a bundled sprite", () => {
+  it("uses the same species sprite for different forms", () => {
+    const result = renderResult(
+      { ...pikachu, id: "025-costume", name: "Pikachu (Costume)" },
+      4,
+      false,
+      true,
+    );
+    expect(result).toContain("sprites/gen1.png");
+  });
+
+  it("shows a later-generation sprite", () => {
     const result = renderResult(
       { ...pikachu, id: "1000", dex: "1000", name: "Gholdengo" },
       9,
       false,
       true,
     );
-    expect(result).toContain('class="sprite-fallback"');
-    expect(result).not.toContain("img/1000MS.png");
+    expect(result).toContain("sprites/gen9.png");
+  });
+
+  it("shows a fallback for unknown numbers", () => {
+    const result = renderResult(
+      { ...pikachu, id: "9999", dex: "9999" },
+      9,
+      false,
+      true,
+    );
+    expect(result).toContain('class="sprite-wrap no-sprite"');
   });
 
   it("disables yield actions until a trainee is selected", () => {

@@ -25,6 +25,8 @@ The committed `public/data/gen3.json` through `gen9.json` files were generated f
 
 Generation I–II stat-experience values are derived from historical base stats in [PokéAPI](https://github.com/PokeAPI/pokeapi)'s pinned CSV dataset, released under the BSD 3-Clause license. Its copyright and license notice are retained in [DATA-LICENSES.md](public/DATA-LICENSES.md). `scripts/generate_data.py` regenerates the JSON with Python's standard library and an internet connection. Run `npm run format` afterward to format the generated files.
 
+The local sprite sheets are generated from the [PokéAPI sprites repository](https://github.com/PokeAPI/sprites) at the revision pinned in `scripts/generate_sprites.py`. One sheet holds species introduced in each generation. The browser loads a sheet only when a visible Pokémon needs it; forms currently use their species image. To regenerate the sheets, install ImageMagick 7 and run `npm run generate:sprites`, then `npm run format`. The generated sheets are committed, so ordinary development and deployment do not need ImageMagick or network access. The images retain their original owners' rights and are not covered by the application's Apache license; see [DATA-LICENSES.md](public/DATA-LICENSES.md).
+
 ## Development
 
 Node.js 22 or newer is recommended.
@@ -35,6 +37,7 @@ npm run dev
 ```
 
 - `npm run build` — type-check and create the production bundle
+- `npm run generate:sprites` — regenerate the pinned sprite sheets (requires ImageMagick 7 and network access)
 - `npm test` — run unit tests
 - `npm run check` — lint, format-check, and type-check
 - `npm run check:fix` — apply lint fixes and formatting
@@ -50,9 +53,10 @@ npm run dev
 - `src/state-validation.ts` validates saved state; `src/storage.ts` handles local storage and share links.
 - `src/types.ts`, `src/data.ts`, `src/search.ts`, and `src/training.ts` hold the shared models and game logic.
 - `src/generation.ts` holds the generation-specific guidance shown in the interface.
+- `src/sprites.ts` locates a species in a generated sprite sheet; `scripts/generate_sprites.py` rebuilds the sheets and manifest.
 
 `npm run build` writes the static site to `dist/`. Vite uses relative asset paths, so the output works from a GitHub Pages project subdirectory.
 
 ## License
 
-The application code is licensed under Apache 2.0; see [LICENSE](LICENSE). The generated data has the licenses described above. Pokémon-related names and assets belong to their respective owners.
+The application code is licensed under Apache 2.0; see [LICENSE](LICENSE). The generated data has the licenses described above. Pokémon-related names and images belong to their respective owners.

@@ -56,5 +56,3 @@ export const totalYield = (pokemon: Pokemon, generation: Generation): number =>
     (total, stat) => total + pokemon.evs[stat],
     0,
   );
-export const spriteUrl = ({ dex }: Pokemon): string =>
-  `${import.meta.env.BASE_URL}img/${dex}MS.png`;

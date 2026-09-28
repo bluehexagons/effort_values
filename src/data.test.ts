@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadPokemon } from "./data.ts";
+import { spriteForDex } from "./sprites.ts";
 import { generations } from "./types.ts";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -18,6 +19,7 @@ describe("Pokémon data", () => {
       const pokemon = await loadPokemon(generation);
       expect(pokemon.length).toBeGreaterThan(0);
       expect(new Set(pokemon.map(({ id }) => id)).size).toBe(pokemon.length);
+      expect(pokemon.every(({ dex }) => spriteForDex(dex) !== null)).toBe(true);
     }
   });
 

@@ -133,11 +133,12 @@ export const bindWorkspace = (app: App): void => {
       const image = event.target;
       if (
         !(image instanceof HTMLImageElement) ||
-        !image.matches(".sprite-wrap img")
+        !image.matches(".sprite-art img")
       )
         return;
-      image.hidden = true;
-      const fallback = image.nextElementSibling;
+      const art = image.parentElement;
+      if (art) art.style.display = "none";
+      const fallback = art?.nextElementSibling;
       if (fallback instanceof HTMLElement)
         fallback.style.display = "inline-flex";
     },
