@@ -17,7 +17,7 @@ The lists contain species and forms from a generation, not game-specific encount
 3. Use **Add** to record a battle yield, or **Save** for quick access.
 4. Use **Share setup** to copy a link containing the current generation's setup.
 
-Existing v2–v4 saved state and links migrate into a Generation IV profile. The old EXP search and display have been removed because EXP awards vary between games and were not reliably represented by the archived dataset.
+The old EXP search and display have been removed because EXP awards vary between games and were not reliably represented by the archived dataset.
 
 ## Data and attribution
 
@@ -47,7 +47,7 @@ npm run dev
 - `src/controls.ts` binds search, filter, sort, generation, share, and reset controls.
 - `src/workspace.ts` handles saved Pokémon, trainee actions, manual totals, and drag and drop.
 - `src/view.ts` updates the DOM; `src/render.ts` contains the HTML templates.
-- `src/state-validation.ts` validates and migrates saved state; `src/storage.ts` handles local storage and share links.
+- `src/state-validation.ts` validates saved state; `src/storage.ts` handles local storage and share links.
 - `src/types.ts`, `src/data.ts`, `src/search.ts`, and `src/training.ts` hold the shared models and game logic.
 - `src/generation.ts` holds the generation-specific guidance shown in the interface.
 

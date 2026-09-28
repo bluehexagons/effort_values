@@ -310,7 +310,7 @@ label {
   image-rendering: auto;
 }
 .sprite-fallback {
-  display: none;
+  display: inline-block;
   font-size: 1.3rem;
 }
 .ev-pills {

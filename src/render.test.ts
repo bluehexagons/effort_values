@@ -24,6 +24,17 @@ describe("result rendering", () => {
     expect(result).toContain("img/025MS.png");
   });
 
+  it("shows a fallback for Pokémon without a bundled sprite", () => {
+    const result = renderResult(
+      { ...pikachu, id: "1000", dex: "1000", name: "Gholdengo" },
+      9,
+      false,
+      true,
+    );
+    expect(result).toContain('class="sprite-fallback"');
+    expect(result).not.toContain("img/1000MS.png");
+  });
+
   it("disables yield actions until a trainee is selected", () => {
     expect(renderResult(pikachu, 4, false, false)).toContain(
       'class="primary-action yield-action" data-action="yield" data-id="025" disabled',
