@@ -29,12 +29,21 @@ The local sprite sheets are generated from the [PokéAPI sprites repository](htt
 
 ## Development
 
-Node.js 22 or newer is recommended.
+Use Node.js 22.12+; `.nvmrc` selects the Node 22 development major used by CI.
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
+
+Basaltwater on Debian is the reference development environment, following the
+[shared project standards](https://github.com/bluehexagons/basaltwater/blob/main/docs/agents/project-standards.md).
+Ordinary Node and npm also work on Linux and Windows 11. Select `.nvmrc` with
+`nvm use`, or use `basaltw node exec -- npm run check` on Basaltwater without
+changing its default Node version. Run `npm run check`, `npm test`, and
+`npm run build` before submitting changes; the check command alone does not run
+the tests or build. Preserve the committed data and sprite sheets under
+`public/`; ordinary development does not require regenerating them.
 
 - `npm run build` — type-check and create the production bundle
 - `npm run generate:sprites` — regenerate the pinned sprite sheets (requires ImageMagick 7 and network access)
