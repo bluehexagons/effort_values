@@ -29,7 +29,7 @@ The local sprite sheets are generated from the [PokéAPI sprites repository](htt
 
 ## Development
 
-Use Node.js 22.12+; `.nvmrc` selects the Node 22 development major used by CI.
+Use Node.js 24.22.1+ within 24.x (LTS) or 26.12.1+ within 26.x (Current); `.nvmrc` selects Node 24.22.1 for development and CI.
 
 ```sh
 npm ci
